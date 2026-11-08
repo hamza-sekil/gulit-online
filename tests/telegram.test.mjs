@@ -20,6 +20,8 @@ const P=R.posts.POSTS;assert.ok(P.length>=20);for(const p of P){assert.ok(p.leng
 const at=(d,h,m=0)=>Date.UTC(2026,10,d,h-3,m); // Addis local time
 // Off by default
 assert.equal(await R.tg.postIfDue(at(9,9)),'off');
+// Deploy preset switches it on before any owner setting exists
+env.TELEGRAM_CHANNEL='@presetchan';assert.equal((await R.tg.tgSettings()).s.enabled,true);assert.equal((await R.tg.tgSettings()).s.channel,'@presetchan');delete env.TELEGRAM_CHANNEL;
 // Owner only + validation
 assert.equal((await R.api.GET(req('/api/admin/telegram'))).status,403);assert.equal((await R.page.GET()).status,303);
 currentUser={userId:'o',email:'owner@example.test'};

@@ -8,7 +8,10 @@ export const DEFAULT_TG: TG = { enabled: false, channel: '', everyHours: 2, star
 const token = () => String((env as any).TELEGRAM_BOT_TOKEN || '');
 export async function tgSettings(): Promise<{ s: TG; raw: string | null }> {
   const row = await database().prepare("SELECT value FROM settings WHERE key='telegram'").first<any>();
-  return { s: { ...DEFAULT_TG, ...(row ? JSON.parse(row.value) : {}) }, raw: row ? row.value : null };
+  // Before the owner saves settings, a channel given in the deploy config (TELEGRAM_CHANNEL) switches posting on.
+  const preset = String((env as any).TELEGRAM_CHANNEL || '');
+  const base = !row && preset ? { ...DEFAULT_TG, enabled: true, channel: preset } : DEFAULT_TG;
+  return { s: { ...base, ...(row ? JSON.parse(row.value) : {}) }, raw: row ? row.value : null };
 }
 async function save(s: TG, raw: string | null) {
   const v = JSON.stringify(s), db = database(), now = Date.now();
