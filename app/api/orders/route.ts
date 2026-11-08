@@ -1,0 +1,8 @@
+import { json } from '../../../lib/owner';
+import { database } from '../../../lib/catalog';
+import { digest,hex } from '../../../lib/password-auth';
+import { makeOrder,getOrder,publicOrder,rateLimit } from '../../../lib/orders';
+import { routeNewOrder,releaseHold } from '../../../lib/routing';
+import { sweepIfDue } from '../../../lib/ops';
+export const dynamic='force-dynamic';
+export async function POST(r:Request){if(r.headers.get('origin')!==new URL(r.url).origin)return json({error:'Invalid origin'},403);if(Number(r.headers.get('content-length'))>16000)return json({error:'Request too large'},413);try{if(!await rateLimit(r))return json({error:'Too many requests. Try later.'},429);const body:any=await r.json();if(body.action==='lookup'){try{await sweepIfDue();}catch{}const order=await getOrder(String(body.id),String(body.token));return order?json({order:publicOrder(order)}):json({error:'Order not found'},404);}const order=await makeOrder(body);try{await sweepIfDue();}catch{}await routeNewOrder(order);const id='GUL-'+hex(crypto.getRandomValues(new Uint8Array(8))).toUpperCase(),token=hex(crypto.getRandomValues(new Uint8Array(32))),createdAt=Date.now();try{await database().prepare('INSERT INTO orders (id,token_hash,payload,created_at) VALUES (?,?,?,?)').bind(id,await digest(token),JSON.stringify(order),createdAt).run();}catch(e){await releaseHold(order);throw e;}return json({order:publicOrder({id,createdAt,...order}),token},201);}catch(e){return json({error:e instanceof Error&&!/D1_|SQLITE|database|storage/i.test(e.message)?e.message:'Order could not be submitted. Please try again.'},400);}}

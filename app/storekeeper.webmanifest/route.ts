@@ -1,0 +1,1 @@
+export async function GET(){return Response.json({id:'/storekeeper',name:'Gulit Storekeeper',short_name:'Gulit Stock',start_url:'/storekeeper',scope:'/storekeeper',display:'standalone',background_color:'#f4f6f1',theme_color:'#133d32',icons:[{src:'/icon-192.png',sizes:'192x192',type:'image/png'},{src:'/icon-512.png',sizes:'512x512',type:'image/png'}]});}

@@ -1,0 +1,20 @@
+{
+  "project": "Gulit Online",
+  "domain": "https://gulitonline.com",
+  "prepared_date_addis_ababa": "2026-11-07",
+  "version_number": 26,
+  "project_id": "appgprj_6ae64278a7a881918af8d353f886e41d",
+  "source_commit": "0ed1e2fa53a6245002a85f3fc944cbf45a014c75",
+  "saved_version_id": "appgprj_6ae64278a7a881918af8d353f886e41d~appgver_bfe6f7aa81d08191a72e035cbb469d27",
+  "deployment_id": "appgdep_6aee4361c6b08191842e9dd918feda6e",
+  "original_tracked_files": 378,
+  "migration_files": 9,
+  "application_tables": 17,
+  "catalog_seed_listings": 1046,
+  "seed_drafts": 1038,
+  "local_product_photo_files": 179,
+  "deployment_artifact_raw_sha256": "a922fa76101b7fd6c12ccb36935ee1142120ecbbc501df8fc5f65b268ecfc0c3",
+  "includes_production_data": false,
+  "includes_runtime_secrets": false,
+  "includes_native_mobile_builds": false
+}

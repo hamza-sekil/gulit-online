@@ -1,0 +1,9 @@
+import { headers } from 'next/headers';
+import { database } from './catalog';
+import { digest } from './password-auth';
+export const DRIVER_COOKIE='__Host-gulit-driver';
+export function driverCookie(token:string,age=43200){return `${DRIVER_COOKIE}=${token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=${age}`;}
+export async function driver(){const h=await headers(),token=h.get('cookie')?.split(';').map(x=>x.trim()).find(x=>x.startsWith(DRIVER_COOKIE+'='))?.slice(DRIVER_COOKIE.length+1);if(!token||!/^[a-f0-9]{64}$/.test(token))return null;return await database().prepare('SELECT d.id,d.name,d.username FROM driver_sessions s JOIN drivers d ON d.id=s.driver_id WHERE s.token_hash=? AND s.expires>? AND d.active=1').bind(await digest(token),Date.now()).first<any>();}
+export const transitions:Record<string,string[]>={assigned:['picked_up','problem'],picked_up:['on_way','problem'],on_way:['delivered','problem'],problem:['on_way'],delivered:[]};
+export async function driverGuard(r:Request){const user=await driver();if(!user)return {error:Response.json({error:'Driver sign-in required'},{status:401,headers:{'Cache-Control':'no-store'}})};if(r.method!=='GET'&&r.headers.get('origin')!==new URL(r.url).origin)return {error:Response.json({error:'Invalid origin'},{status:403})};return {user};}
+export async function driverRate(r:Request,username:string){const db=database(),now=Date.now();for(const k of ['driver-ip:'+await digest(r.headers.get('cf-connecting-ip')||'unknown'),'driver-user:'+await digest(username)]){await db.prepare('INSERT INTO admin_attempts (key,count,until) VALUES (?,1,?) ON CONFLICT(key) DO UPDATE SET count=CASE WHEN until<? THEN 1 ELSE count+1 END,until=CASE WHEN until<? THEN excluded.until ELSE until END').bind(k,now+900000,now,now).run();const row=await db.prepare('SELECT count FROM admin_attempts WHERE key=?').bind(k).first<any>();if(row.count>20)return false;}return true;}

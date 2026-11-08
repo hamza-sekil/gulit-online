@@ -1,0 +1,8 @@
+import fs from 'node:fs';import vm from 'node:vm';import assert from 'node:assert/strict';
+const s=fs.readFileSync('lib/engineer-html.ts','utf8'),h=JSON.parse(s.slice('export default '.length).trim().replace(/;$/,''));const script=h.match(/<script>([\s\S]*?)<\/script>/)[1];new vm.Script(script);
+const block=script.slice(script.indexOf("$('shareLocation').onclick="),script.indexOf("$('logout').onclick="));
+function fixture(){const nodes=new Map(),calls=[];let gps;let finish;const pending=new Promise(resolve=>finish=resolve);const context=vm.createContext({navigator:{geolocation:{getCurrentPosition(success){gps=success}}},$:id=>{if(!nodes.has(id))nodes.set(id,{});return nodes.get(id)},api:async(p,m,b)=>{calls.push(b.action);if(b.action==='location')await pending;return {engineer:{available:1}}},renderProfile(){},Promise,profile:{available:1},locationGeneration:0,locationUpdate:Promise.resolve()});new vm.Script(block).runInContext(context);return {nodes,calls,gps:()=>gps,finish,context};}
+const position={coords:{latitude:9,longitude:38,accuracy:20}};
+let f=fixture();f.nodes.get('shareLocation').onclick();await f.nodes.get('clearLocation').onclick();await f.gps()(position);assert.deepEqual(f.calls,['clear_location']);
+f=fixture();f.nodes.get('shareLocation').onclick();const sharing=f.gps()(position),clearing=f.nodes.get('clearLocation').onclick();await Promise.resolve();assert.deepEqual(f.calls,['location']);f.finish();await sharing;await clearing;assert.deepEqual(f.calls,['location','clear_location']);
+console.log('PASS: clearing location cancels a pending GPS callback and waits for an in-flight update before clearing');

@@ -1,0 +1,14 @@
+{
+  "appId": "com.gulitonline.app",
+  "appName": "Gulit Online",
+  "webDir": "www",
+  "server": {
+    "url": "https://gulitonline.com",
+    "allowNavigation": ["gulitonline.com", "*.chapa.co"]
+  },
+  "ios": { "contentInset": "always", "limitsNavigationsToAppBoundDomains": false },
+  "plugins": {
+    "SplashScreen": { "launchShowDuration": 800, "backgroundColor": "#133D32", "showSpinner": false },
+    "PushNotifications": { "presentationOptions": ["badge", "sound", "alert"] }
+  }
+}

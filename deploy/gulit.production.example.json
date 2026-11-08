@@ -1,0 +1,9 @@
+{
+  "workerName": "gulit-online",
+  "d1DatabaseName": "gulit-online-db",
+  "d1DatabaseId": "PASTE-THE-ID-FROM-wrangler-d1-create",
+  "r2BucketName": "gulit-online-files",
+  "routes": [],
+  "routesAfterDnsMove": ["gulitonline.com", "www.gulitonline.com"],
+  "crons": ["* * * * *"]
+}
