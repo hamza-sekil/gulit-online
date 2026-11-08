@@ -55,6 +55,14 @@ switch (command) {
     writeD1Config(s);
     wrangler("d1", "migrations", "apply", s.d1DatabaseName, "--remote", "--config", d1Config);
     break;
+  case "import-once": {
+    // One-time copy of the old site's data during a Cloudflare build. Inserts use OR IGNORE, so a re-run changes nothing.
+    const file = join(root, "deploy", "private", "live-data.sql");
+    if (!existsSync(file)) { console.log("No deploy/private/live-data.sql — nothing to import."); break; }
+    writeD1Config(s);
+    wrangler("d1", "execute", s.d1DatabaseName, "--remote", "--file", file, "--config", d1Config);
+    break;
+  }
   case "import": {
     if (!arg || !existsSync(arg)) fail("Give the data file: node scripts/gulit-deploy.mjs import gulit_live_data_import.sql");
     writeD1Config(s);
