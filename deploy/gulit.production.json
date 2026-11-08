@@ -3,7 +3,10 @@
   "d1DatabaseName": "gulit-online-db",
   "d1DatabaseId": "144eca50-de6b-4d9b-8250-c697b170fa04",
   "r2BucketName": "gulit-online-files",
-  "routes": [],
+  "routes": [
+    "gulitonline.com",
+    "www.gulitonline.com"
+  ],
   "routesAfterDnsMove": [
     "gulitonline.com",
     "www.gulitonline.com"

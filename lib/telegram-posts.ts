@@ -11,7 +11,7 @@ Order from your favourite Addis supermarket from home — we deliver to your doo
 
 🏪 <b>Own a supermarket, shop or bakery?</b>
 Become a Gulit partner. We bring you customers and deliver for you — only 1% commission.
-👉 gulit-online.cdg627dggv.workers.dev/partners`,
+👉 gulitonline.com/partners`,
 `📱 <b>በስልክዎ ይግዙ፣ በስልክዎ ይክፈሉ</b>
 ቴሌብር፣ ሲቢኢ ብር ወይም ካርድ — በቅርብ ቀን በጉሊት።
 
@@ -32,7 +32,7 @@ Clear delivery prices by distance from the supermarket to your home. Coming soon
 
 🤝 <b>Producer or wholesaler?</b>
 Sell your products to customers across Addis on Gulit.
-👉 gulit-online.cdg627dggv.workers.dev/partners`,
+👉 gulitonline.com/partners`,
 `🔔 ትዕዛዝዎ የት እንደደረሰ በስልክዎ ይከታተሉ — ተረጋገጠ፣ ታሸገ፣ በመንገድ ላይ፣ ደረሰ።
 
 🔔 Follow your order on your phone — confirmed, packed, on the way, delivered.
@@ -56,7 +56,7 @@ Use Gulit in the language you like. Launching soon.`,
 
 🏪 <b>Partner with Gulit</b>
 You keep your stock and prices; customers pay you directly.
-👉 Register: gulit-online.cdg627dggv.workers.dev/partners`,
+👉 Register: gulitonline.com/partners`,
 `👨‍👩‍👧 ለቤተሰብዎ የሳምንቱን ግብይት በአንድ ጊዜ ያዝዙ።
 
 👨‍👩‍👧 Order the family's weekly shopping in one go.
@@ -75,7 +75,7 @@ Coming soon on Gulit.`,
 
 🥖 <b>Bakeries and butchers</b>
 Join Gulit and sell to customers near you.
-👉 gulit-online.cdg627dggv.workers.dev/partners`,
+👉 gulitonline.com/partners`,
 `🛒 ከብዙ ሱፐርማርኬቶች ዕቃ፣ በአንድ መተግበሪያ።
 <b>በቅርብ ቀን።</b>
 
@@ -112,7 +112,7 @@ Want to deliver with Gulit? Message us through this channel.`,
 
 🤝 <b>Growing with Addis businesses</b>
 Supermarkets, shops, producers — join us before launch.
-👉 gulit-online.cdg627dggv.workers.dev/partners`,
+👉 gulitonline.com/partners`,
 `✨ <b>ጉሊት — የዕለት ገበያዎ፣ ቤትዎ ድረስ።</b>
 በቅርብ ቀን። ይጠብቁን!
 
