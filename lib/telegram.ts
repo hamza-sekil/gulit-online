@@ -3,7 +3,7 @@ import { database } from './catalog';
 import { addisMinutes } from './settings';
 import { POSTS } from './telegram-posts';
 // Automatic Telegram channel posts from the Cloudflare cron (runs every minute; posts only when a slot is due).
-export type TG = { enabled: boolean; channel: string; everyHours: number; startHour: number; endHour: number; next: number; lastSlot: string; lastAt: number; lastError: string; sent: number };
+export type TG = { enabled: boolean; channel: string; everyHours: number; startHour: number; endHour: number; next: number; lastSlot: string; lastAt: number; lastError: string; sent: number; postNow?: string };
 export const DEFAULT_TG: TG = { enabled: false, channel: '', everyHours: 2, startHour: 7, endHour: 21, next: 0, lastSlot: '', lastAt: 0, lastError: '', sent: 0 };
 const token = () => String((env as any).TELEGRAM_BOT_TOKEN || '');
 export async function tgSettings(): Promise<{ s: TG; raw: string | null }> {
@@ -51,9 +51,12 @@ export async function postIfDue(now = Date.now()) {
   if (!token()) return 'no-token';
   const { s, raw } = await tgSettings();
   if (!s.enabled || !s.channel || !POSTS.length) return 'off';
+  // TELEGRAM_POST_NOW (deploy config): send the next post once, right away, outside the schedule.
+  const once = String((env as any).TELEGRAM_POST_NOW || '');
+  const now1 = once && s.postNow !== once;
   const slot = slotFor(s, now);
-  if (!slot || slot === s.lastSlot) return 'not-due';
-  const i = s.next % POSTS.length, claimed = { ...s, lastSlot: slot, next: i + 1 };
+  if (!now1 && (!slot || slot === s.lastSlot)) return 'not-due';
+  const i = s.next % POSTS.length, claimed = now1 ? { ...s, postNow: once, next: i + 1 } : { ...s, lastSlot: slot!, next: i + 1 };
   if (!await save(claimed, raw)) return 'busy';
   let err = '';
   try { await sendTelegram(s.channel, POSTS[i]); } catch (e) { err = e instanceof Error ? e.message : 'failed'; }

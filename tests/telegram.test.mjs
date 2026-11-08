@@ -40,6 +40,9 @@ let n=0;for(let h=0;h<24;h++)for(const m of [0,10,20,40])if(R.tg.slotFor(d.setti
 r=await R.api.POST(req('/api/admin/telegram','POST',{action:'post-now'}));d=await r.json();assert.equal(sentMsgs.at(-1).b.text,P[2]);assert.equal(d.nextIndex,3);assert.equal(d.settings.sent,3);
 // Errors recorded, not thrown
 await R.api.POST(req('/api/admin/telegram','POST',{channel:'@badchannel'}));assert.equal(await R.tg.postIfDue(at(9,13)),'error');d=await(await R.api.GET(req('/api/admin/telegram'))).json();assert.match(d.settings.lastError,/chat not found/);
+// One-off post now (deploy config), outside the schedule, only once
+await R.api.POST(req('/api/admin/telegram','POST',{channel:'@gulitonline'}));env.TELEGRAM_POST_NOW='t1';const before=sentMsgs.length;
+assert.equal(await R.tg.postIfDue(at(9,1,30)),'sent');assert.equal(await R.tg.postIfDue(at(9,1,31)),'not-due');assert.equal(sentMsgs.length,before+1);delete env.TELEGRAM_POST_NOW;
 // Turned off
 await R.api.POST(req('/api/admin/telegram','POST',{enabled:false}));assert.equal(await R.tg.postIfDue(at(9,15)),'off');
 const h=await(await R.page.GET()).text();new Function(h.split('<script>')[1].split('</script>')[0]);

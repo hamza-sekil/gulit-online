@@ -15,7 +15,7 @@ const { d1, r2 } = hostingConfig;
 
 // Production deploy to Gulit's own Cloudflare account (see DEPLOY.md):
 // GULIT_DEPLOY=1 reads deploy/gulit.production.json for the real D1/R2 names, cron and routes.
-type GulitDeploy = { workerName: string; d1DatabaseName: string; d1DatabaseId: string; r2BucketName: string; routes?: string[]; crons?: string[]; telegramChannel?: string };
+type GulitDeploy = { workerName: string; d1DatabaseName: string; d1DatabaseId: string; r2BucketName: string; routes?: string[]; crons?: string[]; telegramChannel?: string; telegramPostNow?: string };
 function readDeploy(): GulitDeploy | null {
   if (process.env.GULIT_DEPLOY !== "1") return null;
   const file = resolve(process.cwd(), "deploy", "gulit.production.json");
@@ -41,7 +41,7 @@ const localBindingConfig = {
         preview_urls: false,
         ...(deploy.crons?.length ? { triggers: { crons: deploy.crons } } : {}),
         ...(deploy.routes?.length ? { routes: deploy.routes.map((pattern) => (pattern.includes("*") ? { pattern, zone_name: pattern.split("/")[0].split(".").slice(-2).join(".") } : { pattern, custom_domain: true })) } : {}),
-        vars: { GULIT_HOSTING: "own-cloudflare", ...(deploy.telegramChannel ? { TELEGRAM_CHANNEL: deploy.telegramChannel } : {}) },
+        vars: { GULIT_HOSTING: "own-cloudflare", ...(deploy.telegramChannel ? { TELEGRAM_CHANNEL: deploy.telegramChannel } : {}), ...(deploy.telegramPostNow ? { TELEGRAM_POST_NOW: deploy.telegramPostNow } : {}) },
       }
     : {}),
   d1_databases: d1
