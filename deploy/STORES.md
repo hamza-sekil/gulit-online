@@ -72,7 +72,7 @@ Gulit Online is operated by MOM Manufacturing PLC, Addis Ababa.
 (Have a native speaker check the wording.)
 
 **Category:** Shopping (Apple: Shopping, secondary Food & Drink) · **Content rating:** Everyone / 4+ · **Target audience:** 18+
-**Contact:** ceo@mommanufacturingplc.com · +251911225566 · **Privacy:** https://gulitonline.com/privacy · **Support:** https://gulitonline.com/support
+**Contact:** ceo@mommanufacturingplc.com · +251909225566 / +251910828617 · **Privacy:** https://gulitonline.com/privacy · **Support:** https://gulitonline.com/support
 
 ## Data safety (Google) and App Privacy (Apple) answers
 | Data | Collected | Shared | Why | Optional |

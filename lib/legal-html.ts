@@ -5,14 +5,15 @@ export const BUSINESS = {
   legal: 'MOM Manufacturing PLC',
   country: 'Ethiopia',
   city: 'Addis Ababa',
-  phone: '+251911225566',
+  phone: '+251909225566',
+  phone2: '+251910828617',
   email: 'ceo@mommanufacturingplc.com',
   site: 'https://gulitonline.com',
   updated: '7 November 2026',
 };
 const B = BUSINESS;
 const shell = (title: string, body: string) => `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title} · Gulit Online</title><meta name="description" content="${title} for Gulit Online, operated by ${B.legal}."><link rel="icon" href="/favicon.svg"><style>body{margin:0;font:17px/1.65 Arial,sans-serif;color:#18372f;background:#f6f5f0}header{background:#133d32;color:#fff;padding:18px 20px}header a{color:#d5ed84;text-decoration:none;font-weight:700;font-size:22px}main{max-width:760px;margin:0 auto;padding:24px 18px 60px;background:#fff}h1{font-size:30px;line-height:1.2;margin:8px 0 6px}h2{font-size:21px;margin:28px 0 8px}p,li{max-width:70ch}ul{padding-left:22px}.muted{color:#627269;font-size:15px}a{color:#133d32}nav{display:flex;gap:16px;flex-wrap:wrap;margin-top:30px;padding-top:16px;border-top:1px solid #e3e8df}.contact{background:#eef4e4;border-radius:10px;padding:14px 16px}</style></head><body><header><a href="/">Gulit.</a></header><main><h1>${title}</h1><p class="muted">Last updated ${B.updated} · ${B.trade} is operated by ${B.legal}, ${B.city}, ${B.country}.</p>${body}<nav><a href="/">Shop</a><a href="/privacy">Privacy policy</a><a href="/terms">Terms</a><a href="/support">Help &amp; support</a><a href="/partners">Sell on Gulit</a><a href="/partners/agreement">Partner agreement</a></nav></main></body></html>`;
-const contact = `<div class="contact"><b>${B.legal}</b> (${B.trade})<br>${B.city}, ${B.country}<br>Phone: <a href="tel:${B.phone}">${B.phone}</a><br>Email: <a href="mailto:${B.email}">${B.email}</a><br>Or use <b>Customer care</b> chat in the shop.</div>`;
+const contact = `<div class="contact"><b>${B.legal}</b> (${B.trade})<br>${B.city}, ${B.country}<br>Phone: <a href="tel:${B.phone}">${B.phone}</a> · <a href="tel:${B.phone2}">${B.phone2}</a><br>Email: <a href="mailto:${B.email}">${B.email}</a><br>Or use <b>Customer care</b> chat in the shop.</div>`;
 
 export const privacyHtml = shell('Privacy policy', `
 <p>This policy explains what personal information Gulit Online collects when you use our website and apps, why, who we share it with, and your choices. You can shop without creating an account.</p>
