@@ -37,6 +37,8 @@ const localBindingConfig = {
   ...(deploy
     ? {
         name: deploy.workerName,
+        workers_dev: true,
+        preview_urls: false,
         ...(deploy.crons?.length ? { triggers: { crons: deploy.crons } } : {}),
         ...(deploy.routes?.length ? { routes: deploy.routes.map((pattern) => (pattern.includes("*") ? { pattern, zone_name: pattern.split("/")[0].split(".").slice(-2).join(".") } : { pattern, custom_domain: true })) } : {}),
         vars: { GULIT_HOSTING: "own-cloudflare" },
