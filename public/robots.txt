@@ -1,12 +1,16 @@
 User-agent: *
 Allow: /
+# Private areas (owner, staff, sign-in) — intentionally not in Google
 Disallow: /admin
-Disallow: /api/
-Allow: /api/images/
 Disallow: /engineer
 Disallow: /driver
+Disallow: /storekeeper
 Disallow: /signin-with-chatgpt
 Disallow: /signout-with-chatgpt
 Disallow: /callback
+# App data: block, except what Google needs to show the shop's products
+Disallow: /api/
+Allow: /api/catalog$
+Allow: /api/images/
 
 Sitemap: https://gulitonline.com/sitemap.xml
