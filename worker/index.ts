@@ -4,6 +4,7 @@ import type { ConnectorBinding } from "../lib/connector-contract.mjs";
 import { onChatGPTSites, stripPlatformHeaders, assetLinksResponse } from "../lib/hosting";
 import { sweep } from "../lib/ops";
 import { postIfDue } from "../lib/telegram";
+import { countable, recordVisit, SOURCE_LINKS } from "../lib/visits";
 
 // People type or share links in many forms ("Gulitonline.com/Partners", "/partner", "/partners.html"):
 // send them to the real page instead of a 404. API, asset and app paths are left alone.
@@ -13,6 +14,8 @@ export function friendlyRedirect(request: Request): Response | null {
   const url = new URL(request.url);
   if (/^\/(api|_next|assets|social|product-photos)\//i.test(url.pathname) || /\.[a-z0-9]{2,5}$/i.test(url.pathname) && !/\.html$/i.test(url.pathname)) return null;
   let p = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
+  // Tracking short links (gulitonline.com/tg, /tt, /yt …) open the shop and record where the visitor came from.
+  if (SOURCE_LINKS[p]) { url.pathname = "/"; url.search = "?s=" + SOURCE_LINKS[p]; return Response.redirect(url.toString(), 302); }
   p = ALIASES[p] || p;
   if (p === url.pathname) return null;
   url.pathname = p;
@@ -26,6 +29,7 @@ const worker = {
     if (new URL(request.url).pathname === "/.well-known/assetlinks.json") return assetLinksResponse(env);
     const friendly = friendlyRedirect(request);
     if (friendly) return friendly;
+    if (countable(request)) ctx.waitUntil(recordVisit(request).catch(() => {}));
     let binding = ctx.props?.CONNECTORS;
     // Local preview emulates the same request-scoped capability. This branch and
     // the auxiliary service binding are absent from production builds.

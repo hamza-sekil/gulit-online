@@ -8,13 +8,13 @@ export const POSTS: Post[] = [
 
 🛵 <b>From the supermarket to your door!</b>
 We shop at your favourite Addis supermarket, pack it, and deliver it to your home.
-<b>Gulit — coming soon.</b> 🌐 gulitonline.com` },
+<b>Gulit — coming soon.</b> 🌐 <a href="https://gulitonline.com/tg">gulitonline.com</a>` },
 { photo: 'gulit-01.jpg', text: `🧺 <b>ጉሊት ኦንላይን በቅርብ ቀን!</b>
 የሚወዱትን ሱፐርማርኬት ዕቃ ከቤትዎ ሆነው ያዝዙ — እኛ እናደርሳለን።
 
 🧺 <b>Gulit Online is coming soon!</b>
 Order from your favourite Addis supermarket from home — we deliver to your door.
-🌐 gulitonline.com` },
+🌐 <a href="https://gulitonline.com/tg">gulitonline.com</a>` },
 { photo: 'gulit-02.jpg', text: `📱 <b>ሱፐርማርኬቱ በስልክዎ</b>
 ዕቃዎን ይምረጡ፣ ይክፈሉ፣ ያርፉ — እኛ እናደርሳለን።
 
@@ -45,7 +45,7 @@ Confirmed, packed, on the way, delivered — all on your phone. Coming soon!` },
 
 🏪 <b>Own a supermarket, shop or bakery?</b>
 Become a Gulit partner before launch. You set your prices, we bring customers and deliver — only 1% commission.
-👉 <a href="https://gulitonline.com/partners">gulitonline.com/partners</a>` },
+👉 <a href="https://gulitonline.com/partners?s=telegram">gulitonline.com/partners</a>` },
 { photo: 'gulit-08.jpg', text: `🏍️ <b>ሞተር ሳይክል ወይም መኪና አለዎት?</b>
 ከጉሊት ጋር በአዲስ አበባ ያድርሱ።
 
