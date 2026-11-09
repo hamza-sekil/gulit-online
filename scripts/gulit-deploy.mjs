@@ -57,10 +57,13 @@ switch (command) {
     break;
   case "import-once": {
     // One-time copy of the old site's data during a Cloudflare build. Inserts use OR IGNORE, so a re-run changes nothing.
-    const file = join(root, "deploy", "private", "live-data.sql");
-    if (!existsSync(file)) { console.log("No deploy/private/live-data.sql — nothing to import."); break; }
+    // Also runs deploy/once/*.sql: small data changes, each guarded by a marker row so it applies only once.
+    const files = [join(root, "deploy", "private", "live-data.sql")].filter(existsSync);
+    const onceDir = join(root, "deploy", "once");
+    if (existsSync(onceDir)) files.push(...readdirSync(onceDir).filter(f => f.endsWith(".sql")).sort().map(f => join(onceDir, f)));
+    if (!files.length) { console.log("No one-time data files."); break; }
     writeD1Config(s);
-    wrangler("d1", "execute", s.d1DatabaseName, "--remote", "--file", file, "--config", d1Config);
+    for (const file of files) wrangler("d1", "execute", s.d1DatabaseName, "--remote", "--file", file, "--config", d1Config);
     break;
   }
   case "import": {

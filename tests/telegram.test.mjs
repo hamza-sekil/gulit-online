@@ -16,7 +16,7 @@ async function inner(f){if(cache.has(f))return cache.get(f);if(f.endsWith('.json
 let sentMsgs=[];globalThis.__fetch=async(u,o)=>{sentMsgs.push({u,b:JSON.parse(o.body)});return new Response(JSON.stringify(JSON.parse(o.body).chat_id==='@badchannel'?{ok:false,description:'chat not found'}:{ok:true}),{status:200})};
 const R={};for(const [n,f] of Object.entries({tg:'lib/telegram.ts',posts:'lib/telegram-posts.ts',api:'app/api/admin/telegram/route.ts',page:'app/admin/telegram/route.ts'})){const m=await load(f);if(m.status!=='evaluated')await m.evaluate();R[n]=m.namespace;}
 const origin='https://gulit.test',req=(u,method='GET',body,src=origin)=>new Request(origin+u,{method,headers:{Origin:src,'Content-Type':'application/json'},...(body?{body:JSON.stringify(body)}:{})});
-const P=R.posts.POSTS;assert.ok(P.length>=20);for(const p of P){assert.ok(p.length<4000);assert.match(p,/[ሀ-፿]/,'has Amharic');assert.doesNotMatch(p.replace(/<\/?(b|i)>/g,''),/<[^>]*>/,'only <b>/<i> tags');}
+const P=R.posts.POSTS;assert.ok(P.length>=10);for(const p of P){assert.ok(p.text.length<=1024,'caption limit');assert.match(p.text,/[ሀ-፿]/,'has Amharic');assert.doesNotMatch(p.text.replace(/<\/?(b|i)>|<a href="https:\/\/gulitonline\.com\/[a-z]*">|<\/a>/g,''),/<[^>]*>/,'only safe tags');assert.ok(p.photo||p.video,'every post has a picture or video');assert.ok(fs.existsSync('public/social/'+(p.photo||p.video)),'media file exists');}
 const at=(d,h,m=0)=>Date.UTC(2026,10,d,h-3,m); // Addis local time
 // Off by default
 assert.equal(await R.tg.postIfDue(at(9,9)),'off');
@@ -26,24 +26,24 @@ env.TELEGRAM_CHANNEL='@presetchan';assert.equal((await R.tg.tgSettings()).s.enab
 assert.equal((await R.api.GET(req('/api/admin/telegram'))).status,403);assert.equal((await R.page.GET()).status,303);
 currentUser={userId:'o',email:'owner@example.test'};
 let r=await R.api.POST(req('/api/admin/telegram','POST',{enabled:true,channel:'not a channel'}));assert.equal(r.status,400);
-r=await R.api.POST(req('/api/admin/telegram','POST',{enabled:true,channel:'https://t.me/gulitonline',everyHours:2,startHour:7,endHour:21}));assert.equal(r.status,200);
+r=await R.api.POST(req('/api/admin/telegram','POST',{enabled:true,channel:'https://t.me/gulitonline'}));assert.equal(r.status,200);
 let d=await r.json();assert.equal(d.settings.channel,'@gulitonline');assert.equal(d.tokenSet,true);
-// Slots: 7,9,...,21 Addis, first 15 minutes, once each
-assert.equal(R.tg.slotFor(d.settings,at(9,8)),null);assert.equal(R.tg.slotFor(d.settings,at(9,23)),null);assert.equal(R.tg.slotFor(d.settings,at(9,9,20)),null);assert.ok(R.tg.slotFor(d.settings,at(9,21,5)));
-assert.equal(await R.tg.postIfDue(at(9,8)),'not-due');
-assert.equal(await R.tg.postIfDue(at(9,9,0)),'sent');assert.equal(await R.tg.postIfDue(at(9,9,1)),'not-due','no double post in the same slot');
-assert.equal(await R.tg.postIfDue(at(9,11,3)),'sent');
-assert.equal(sentMsgs.length,2);assert.match(sentMsgs[0].u,/bot123:abc\/sendMessage$/);assert.equal(sentMsgs[0].b.chat_id,'@gulitonline');assert.equal(sentMsgs[0].b.text,P[0]);assert.equal(sentMsgs[1].b.text,P[1]);assert.equal(sentMsgs[0].b.parse_mode,'HTML');
-// Count per day = 8
-let n=0;for(let h=0;h<24;h++)for(const m of [0,10,20,40])if(R.tg.slotFor(d.settings,at(10,h,m)))n++;assert.equal(n,8*2);
+// Default: 2 posts a day, 12:00 and 19:00 Addis, first 15 minutes, once each
+assert.equal(d.settings.everyHours,7);assert.equal(R.tg.slotFor(d.settings,at(9,9)),null);assert.equal(R.tg.slotFor(d.settings,at(9,20)),null);assert.equal(R.tg.slotFor(d.settings,at(9,12,20)),null);assert.ok(R.tg.slotFor(d.settings,at(9,19,5)));
+assert.equal(await R.tg.postIfDue(at(9,9)),'not-due');
+assert.equal(await R.tg.postIfDue(at(9,12,0)),'sent');assert.equal(await R.tg.postIfDue(at(9,12,1)),'not-due','no double post in the same slot');
+assert.equal(await R.tg.postIfDue(at(9,19,3)),'sent');
+assert.equal(sentMsgs.length,2);assert.match(sentMsgs[0].u,/bot123:abc\/sendVideo$/);assert.equal(sentMsgs[0].b.video,'https://gulitonline.com/social/gulit-delivery.mp4');assert.equal(sentMsgs[0].b.caption,P[0].text);assert.match(sentMsgs[1].u,/sendPhoto$/);assert.equal(sentMsgs[1].b.photo,'https://gulitonline.com/social/'+P[1].photo);assert.equal(sentMsgs[0].b.chat_id,'@gulitonline');assert.equal(sentMsgs[0].b.parse_mode,'HTML');
+// Count per day = 2
+let n=0;for(let h=0;h<24;h++)for(const m of [0,10,20,40])if(R.tg.slotFor(d.settings,at(10,h,m)))n++;assert.equal(n,2*2);
 // Post now advances rotation
-r=await R.api.POST(req('/api/admin/telegram','POST',{action:'post-now'}));d=await r.json();assert.equal(sentMsgs.at(-1).b.text,P[2]);assert.equal(d.nextIndex,3);assert.equal(d.settings.sent,3);
+r=await R.api.POST(req('/api/admin/telegram','POST',{action:'post-now'}));d=await r.json();assert.equal(sentMsgs.at(-1).b.caption,P[2].text);assert.equal(d.nextIndex,3);assert.equal(d.settings.sent,3);
 // Errors recorded, not thrown
-await R.api.POST(req('/api/admin/telegram','POST',{channel:'@badchannel'}));assert.equal(await R.tg.postIfDue(at(9,13)),'error');d=await(await R.api.GET(req('/api/admin/telegram'))).json();assert.match(d.settings.lastError,/chat not found/);
+await R.api.POST(req('/api/admin/telegram','POST',{channel:'@badchannel'}));assert.equal(await R.tg.postIfDue(at(10,12)),'error');d=await(await R.api.GET(req('/api/admin/telegram'))).json();assert.match(d.settings.lastError,/chat not found/);
 // One-off post now (deploy config), outside the schedule, only once
 await R.api.POST(req('/api/admin/telegram','POST',{channel:'@gulitonline'}));env.TELEGRAM_POST_NOW='t1';const before=sentMsgs.length;
 assert.equal(await R.tg.postIfDue(at(9,1,30)),'sent');assert.equal(await R.tg.postIfDue(at(9,1,31)),'not-due');assert.equal(sentMsgs.length,before+1);delete env.TELEGRAM_POST_NOW;
 // Turned off
-await R.api.POST(req('/api/admin/telegram','POST',{enabled:false}));assert.equal(await R.tg.postIfDue(at(9,15)),'off');
+await R.api.POST(req('/api/admin/telegram','POST',{enabled:false}));assert.equal(await R.tg.postIfDue(at(11,12)),'off');
 const h=await(await R.page.GET()).text();new Function(h.split('<script>')[1].split('</script>')[0]);
-console.log('PASS: telegram — bilingual post bank, owner-only settings + validation, posts every 2 h 7am–9pm Addis, never twice per slot, rotation, post-now, errors recorded, off switch');
+console.log('PASS: telegram — bilingual picture/video posts, owner-only settings + validation, 2 posts a day (12:00, 19:00 Addis), never twice per slot, rotation, post-now, errors recorded, off switch');

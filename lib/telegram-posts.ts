@@ -1,121 +1,64 @@
-// Rotating "coming soon" posts for the Gulit Telegram channel (Amharic + English). Edit freely; plain text, Telegram HTML allowed (<b>, <i>, <a>).
-export const POSTS: string[] = [
-`🧺 <b>ጉሊት ኦንላይን በቅርብ ቀን!</b>
+// Telegram channel posts (Amharic + English), each with a picture or the delivery video served from gulitonline.com/social/.
+// They rotate in order. Captions: Telegram HTML (<b>, <i>, <a>), max 1024 characters.
+export type Post = { text: string; photo?: string; video?: string };
+export const MEDIA_BASE = 'https://gulitonline.com/social/';
+export const POSTS: Post[] = [
+{ video: 'gulit-delivery.mp4', text: `🛵 <b>ከሱፐርማርኬት እስከ ቤትዎ!</b>
+እኛ ከሚወዱት ሱፐርማርኬት እንገዛለን፣ አሽገን በሞተር ቤትዎ ድረስ እናደርሳለን።
+
+🛵 <b>From the supermarket to your door!</b>
+We shop at your favourite Addis supermarket, pack it, and deliver it to your home.
+<b>Gulit — coming soon.</b> 🌐 gulitonline.com` },
+{ photo: 'gulit-01.jpg', text: `🧺 <b>ጉሊት ኦንላይን በቅርብ ቀን!</b>
 የሚወዱትን ሱፐርማርኬት ዕቃ ከቤትዎ ሆነው ያዝዙ — እኛ እናደርሳለን።
 
 🧺 <b>Gulit Online is coming soon!</b>
 Order from your favourite Addis supermarket from home — we deliver to your door.
-🌐 gulitonline.com`,
-`🏪 <b>ሱፐርማርኬት፣ ሱቅ ወይም ዳቦ ቤት አለዎት?</b>
-የጉሊት አጋር ይሁኑ። ደንበኞች ያመጣልዎታል፣ እኛ እናደርሳለን፣ ኮሚሽኑ 1% ብቻ ነው።
+🌐 gulitonline.com` },
+{ photo: 'gulit-02.jpg', text: `📱 <b>ሱፐርማርኬቱ በስልክዎ</b>
+ዕቃዎን ይምረጡ፣ ይክፈሉ፣ ያርፉ — እኛ እናደርሳለን።
+
+📱 <b>Your favourite supermarket, on your phone</b>
+Pick, pay, relax — our riders deliver across Addis. Coming soon!` },
+{ photo: 'gulit-03.jpg', text: `💳 <b>በቴሌብር፣ በሲቢኢ ብር ወይም በካርድ ይክፈሉ</b>
+ደህንነቱ የተጠበቀ የኦንላይን ክፍያ።
+
+💳 <b>Pay with Telebirr, CBE Birr or card</b>
+Safe online payment, checked before your order moves. Coming soon on Gulit.` },
+{ photo: 'gulit-04.jpg', text: `🥬 <b>ፍራፍሬ፣ አትክልት፣ ወተት፣ ዳቦ — ሁሉም በአንድ ቦታ</b>
+ቡና፣ ዘይት፣ ስኳር፣ ሳሙና እና የቤት ዕቃዎችም።
+
+🥬 <b>Your weekly shop in one place</b>
+Fruit, veg, milk, bread, coffee, oil, soap… What's always on your list? 👇` },
+{ photo: 'gulit-05.jpg', text: `✅ <b>ዕቃ ካለቀ እርስዎ ይመርጣሉ</b>
+ምትክ ይምረጡ ወይም አይከፍሉበትም። ያለፈቃድዎ ምንም አይቀየርም።
+
+✅ <b>Out of stock? You choose.</b>
+Pick a replacement — or don't pay for it. No surprises.` },
+{ photo: 'gulit-06.jpg', text: `🔔 <b>ተረጋገጠ ➜ ታሸገ ➜ በመንገድ ላይ ➜ ደረሰ</b>
+ትዕዛዝዎን በስልክዎ ይከታተሉ።
+
+🔔 <b>Track every step of your order</b>
+Confirmed, packed, on the way, delivered — all on your phone. Coming soon!` },
+{ photo: 'gulit-07.jpg', text: `🏪 <b>ሱፐርማርኬት፣ ሱቅ ወይም ዳቦ ቤት አለዎት?</b>
+የጉሊት አጋር ይሁኑ — ዋጋዎን እርስዎ ይወስናሉ፣ ኮሚሽኑ 1% ብቻ።
 
 🏪 <b>Own a supermarket, shop or bakery?</b>
-Become a Gulit partner. We bring you customers and deliver for you — only 1% commission.
-👉 gulitonline.com/partners`,
-`📱 <b>በስልክዎ ይግዙ፣ በስልክዎ ይክፈሉ</b>
-ቴሌብር፣ ሲቢኢ ብር ወይም ካርድ — በቅርብ ቀን በጉሊት።
+Become a Gulit partner before launch. You set your prices, we bring customers and deliver — only 1% commission.
+👉 <a href="https://gulitonline.com/partners">gulitonline.com/partners</a>` },
+{ photo: 'gulit-08.jpg', text: `🏍️ <b>ሞተር ሳይክል ወይም መኪና አለዎት?</b>
+ከጉሊት ጋር በአዲስ አበባ ያድርሱ።
 
-📱 <b>Shop on your phone, pay on your phone</b>
-Telebirr, CBE Birr or card — coming soon on Gulit.`,
-`🥬 ትኩስ አትክልትና ፍራፍሬ፣ ወተት፣ ዳቦ፣ የቤት ዕቃዎች… ሁሉም በአንድ ቦታ።
-<b>ጉሊት — በቅርብ ቀን።</b>
+🏍️ <b>Have a motorbike or car?</b>
+Join the Gulit delivery team across Addis. Message this channel or call +251909225566.` },
+{ photo: 'gulit-09.jpg', text: `🇪🇹 <b>በአማርኛ ወይም በእንግሊዝኛ ይግዙ</b>
+በአንድ ንክኪ ቋንቋ ይቀይሩ።
 
-🥬 Fresh fruit and vegetables, milk, bread, household needs… all in one place.
-<b>Gulit — coming soon.</b>`,
-`🛵 <b>ማድረሻ በአዲስ አበባ</b>
-ከሱፐርማርኬቱ እስከ ቤትዎ ባለው ርቀት የሚወሰን ግልጽ የማድረሻ ዋጋ።
+🇪🇹 <b>Shop in Amharic or English</b>
+One tap to switch — the whole app follows you. Coming soon!` },
+{ photo: 'gulit-10.jpg', text: `🧾 <b>ከመክፈልዎ በፊት ሁሉንም ዋጋ ይመልከቱ</b>
+የዕቃ ዋጋ፣ የአገልግሎት ክፍያ እና ማድረሻ በግልጽ። ሱፐርማርኬቶችን አወዳድረው ይቆጥቡ!
 
-🛵 <b>Delivery across Addis Ababa</b>
-Clear delivery prices by distance from the supermarket to your home. Coming soon.`,
-`🤝 <b>አምራች ወይም ጅምላ አከፋፋይ ነዎት?</b>
-ዕቃዎችዎን በጉሊት ለአዲስ አበባ ደንበኞች ያቅርቡ።
-
-🤝 <b>Producer or wholesaler?</b>
-Sell your products to customers across Addis on Gulit.
-👉 gulitonline.com/partners`,
-`🔔 ትዕዛዝዎ የት እንደደረሰ በስልክዎ ይከታተሉ — ተረጋገጠ፣ ታሸገ፣ በመንገድ ላይ፣ ደረሰ።
-
-🔔 Follow your order on your phone — confirmed, packed, on the way, delivered.
-<b>Gulit, coming soon.</b>`,
-`🇪🇹 <b>በአማርኛ እና በእንግሊዝኛ</b>
-ጉሊት በሁለቱም ቋንቋ ይሠራል።
-
-🇪🇹 <b>In Amharic and English</b>
-Use Gulit in the language you like. Launching soon.`,
-`🔄 ዕቃ ካለቀ ምትክ ይመርጣሉ ወይም አይከፍሉበትም። ያለፈቃድዎ ምንም አይቀየርም።
-
-🔄 If an item is out of stock, you choose a replacement — or you don't pay for it. Nothing changes without your OK.
-<b>Gulit — coming soon.</b>`,
-`⏰ ጊዜዎን ይቆጥቡ። ወረፋ የለም፣ ትራፊክ የለም።
-<b>ጉሊት በቅርብ ቀን።</b>
-
-⏰ Save your time. No queues, no traffic.
-<b>Gulit is coming soon.</b>`,
-`🏪 <b>የንግድ አጋሮቻችን ይሁኑ</b>
-ዕቃዎና ዋጋዎ የእርስዎ ናቸው፤ ደንበኛው በቀጥታ ለእርስዎ ይከፍላል።
-
-🏪 <b>Partner with Gulit</b>
-You keep your stock and prices; customers pay you directly.
-👉 Register: gulitonline.com/partners`,
-`👨‍👩‍👧 ለቤተሰብዎ የሳምንቱን ግብይት በአንድ ጊዜ ያዝዙ።
-
-👨‍👩‍👧 Order the family's weekly shopping in one go.
-<b>Gulit — coming soon to Addis.</b>`,
-`🔒 <b>ደህንነቱ የተጠበቀ ክፍያ</b>
-ክፍያዎች በቻፓ በኩል ይረጋገጣሉ።
-
-🔒 <b>Safe payments</b>
-Online payments are checked through Chapa before your order moves.
-Coming soon on Gulit.`,
-`📢 ይህንን ቻናል ለጓደኞችዎ ያጋሩ — ጉሊት ሲከፈት የመጀመሪያው ይሁኑ!
-
-📢 Share this channel with friends — be the first to know when Gulit opens!`,
-`🥖 <b>ዳቦ ቤቶች እና ሥጋ ቤቶች</b>
-ጉሊት ላይ ይቀላቀሉ፣ በአካባቢዎ ላሉ ደንበኞች ይሽጡ።
-
-🥖 <b>Bakeries and butchers</b>
-Join Gulit and sell to customers near you.
-👉 gulitonline.com/partners`,
-`🛒 ከብዙ ሱፐርማርኬቶች ዕቃ፣ በአንድ መተግበሪያ።
-<b>በቅርብ ቀን።</b>
-
-🛒 Products from many supermarkets, in one app.
-<b>Coming soon.</b>`,
-`💬 ጥያቄ አለዎት? የደንበኞች አገልግሎታችን በመተግበሪያው ውስጥ በቻት ያገለግልዎታል።
-
-💬 Questions? Our customer care team will answer you by chat inside the app.
-Gulit — launching soon.`,
-`🌐 <b>gulitonline.com</b>
-ጉሊት ኦንላይን ገበያ — በቅርብ ቀን ይከፈታል።
-
-🌐 <b>gulitonline.com</b>
-Gulit Online Market — opening soon. Stay tuned!`,
-`📍 የካርታ ምልክትዎን ያስቀምጡ፣ አድራሽዎ በቀጥታ ቤትዎ ይደርሳል።
-
-📍 Drop your map pin and the rider comes straight to your door.
-<b>Gulit — coming soon.</b>`,
-`🧾 ግልጽ ዋጋ፦ የዕቃ ዋጋ፣ የአገልግሎት ክፍያ እና የማድረሻ ዋጋ ከመክፈልዎ በፊት ይታያሉ።
-
-🧾 Clear prices: products, service fee and delivery are shown before you pay.
-Coming soon on Gulit.`,
-`🚚 <b>ተሽከርካሪ ወይም ሞተር ሳይክል አለዎት?</b>
-ከጉሊት ጋር ለማድረስ መሥራት ከፈለጉ በዚህ ቻናል ያግኙን።
-
-🚚 <b>Have a motorbike or car?</b>
-Want to deliver with Gulit? Message us through this channel.`,
-`☕ ቡና፣ ስኳር፣ ዘይት፣ ሳሙና… የዕለት ፍላጎትዎ በጉሊት።
-
-☕ Coffee, sugar, oil, soap… your everyday needs on Gulit.
-<b>Coming soon.</b>`,
-`🤝 <b>በአዲስ አበባ ካሉ ንግዶች ጋር እያደግን ነው</b>
-ሱፐርማርኬቶች፣ ሱቆች፣ አምራቾች — ይቀላቀሉን።
-
-🤝 <b>Growing with Addis businesses</b>
-Supermarkets, shops, producers — join us before launch.
-👉 gulitonline.com/partners`,
-`✨ <b>ጉሊት — የዕለት ገበያዎ፣ ቤትዎ ድረስ።</b>
-በቅርብ ቀን። ይጠብቁን!
-
-✨ <b>Gulit — your everyday market, delivered.</b>
-Coming soon. Stay with us!`,
+🧾 <b>See every birr before you pay</b>
+Products, service fee and delivery shown upfront — and compare supermarkets to save. Coming soon to Addis!` },
 ];

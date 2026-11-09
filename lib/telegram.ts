@@ -1,10 +1,10 @@
 import { env } from 'cloudflare:workers';
 import { database } from './catalog';
 import { addisMinutes } from './settings';
-import { POSTS } from './telegram-posts';
+import { POSTS, MEDIA_BASE, type Post } from './telegram-posts';
 // Automatic Telegram channel posts from the Cloudflare cron (runs every minute; posts only when a slot is due).
 export type TG = { enabled: boolean; channel: string; everyHours: number; startHour: number; endHour: number; next: number; lastSlot: string; lastAt: number; lastError: string; sent: number; postNow?: string };
-export const DEFAULT_TG: TG = { enabled: false, channel: '', everyHours: 2, startHour: 7, endHour: 21, next: 0, lastSlot: '', lastAt: 0, lastError: '', sent: 0 };
+export const DEFAULT_TG: TG = { enabled: false, channel: '', everyHours: 7, startHour: 12, endHour: 19, next: 0, lastSlot: '', lastAt: 0, lastError: '', sent: 0 };
 const token = () => String((env as any).TELEGRAM_BOT_TOKEN || '');
 export async function tgSettings(): Promise<{ s: TG; raw: string | null }> {
   const row = await database().prepare("SELECT value FROM settings WHERE key='telegram'").first<any>();
@@ -40,9 +40,13 @@ export function slotFor(s: TG, now = Date.now()) {
   if (h < s.startHour || h > s.endHour || (h - s.startHour) % s.everyHours !== 0 || m % 60 >= 15) return null;
   return new Date(now + 3 * 3600_000).toISOString().slice(0, 10) + 'T' + h;
 }
-export async function sendTelegram(channel: string, text: string) {
+export async function sendTelegram(channel: string, post: Post | string) {
   if (!token()) throw Error('TELEGRAM_BOT_TOKEN is not set on the server.');
-  const r = await fetch(`https://api.telegram.org/bot${token()}/sendMessage`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: channel, text, parse_mode: 'HTML', link_preview_options: { is_disabled: true } }) });
+  const p: Post = typeof post === 'string' ? { text: post } : post;
+  const [method, body]: [string, any] = p.video ? ['sendVideo', { video: MEDIA_BASE + p.video, caption: p.text, supports_streaming: true }]
+    : p.photo ? ['sendPhoto', { photo: MEDIA_BASE + p.photo, caption: p.text }]
+    : ['sendMessage', { text: p.text, link_preview_options: { is_disabled: true } }];
+  const r = await fetch(`https://api.telegram.org/bot${token()}/${method}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ chat_id: channel, parse_mode: 'HTML', ...body }) });
   const j: any = await r.json().catch(() => ({}));
   if (!r.ok || !j.ok) throw Error('Telegram: ' + String(j.description || r.status).slice(0, 200));
 }
