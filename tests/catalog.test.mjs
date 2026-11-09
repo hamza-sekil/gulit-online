@@ -93,7 +93,7 @@ currentUser=owner;response=await driverAdmin.PATCH(req('PATCH',{action:'reset',i
 console.log('PASS: owner-only driver management, paid-only assignments, hashed driver codes, scoped sessions, private receipts, other-driver isolation, delivery transitions, revocation and code reset');
 
 // New split billing and private care workflow.
-assert.deepEqual(JSON.parse(JSON.stringify(mapMod.namespace.totals(575000,40000))),{billingVersion:2,subtotal:575000,sellerTotal:575000,sellerNet:500000,sellerVat:75000,vat:75000,service:20000,serviceVat:3000,delivery:40000,deliveryVat:6000,gulitVat:9000,gulitTotal:69000,total:644000});
+assert.deepEqual(JSON.parse(JSON.stringify(mapMod.namespace.totals(575000,40000))),{billingVersion:2,goodsTotal:575000,packaging:0,subtotal:575000,sellerTotal:575000,sellerNet:500000,sellerVat:75000,vat:75000,service:20000,serviceVat:3000,delivery:40000,deliveryVat:6000,gulitVat:9000,gulitTotal:69000,total:644000});
 currentUser=null;cookieHeader='';sql.exec('DELETE FROM admin_attempts');response=await orderApi.POST(req('POST',orderInput));const split=await response.json();assert.equal(split.order.billingVersion,2);assert.equal(split.order.status,'Awaiting separate payments');
 const customerChatMod=await load('app/api/orders/chat/route.ts');await customerChatMod.evaluate();const customerChat=customerChatMod.namespace;const careChatMod=await load('app/api/admin/chat/route.ts');await careChatMod.evaluate();const careChat=careChatMod.namespace;
 assert.equal((await customerChat.POST(req('POST',{action:'list',id:split.order.id,token:'f'.repeat(64)}))).status,404);assert.equal((await careChat.POST(req('POST',{id:split.order.id,body:'Bank details'}))).status,403);
