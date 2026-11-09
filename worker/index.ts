@@ -5,11 +5,27 @@ import { onChatGPTSites, stripPlatformHeaders, assetLinksResponse } from "../lib
 import { sweep } from "../lib/ops";
 import { postIfDue } from "../lib/telegram";
 
+// People type or share links in many forms ("Gulitonline.com/Partners", "/partner", "/partners.html"):
+// send them to the real page instead of a 404. API, asset and app paths are left alone.
+const ALIASES: Record<string, string> = { "/partner": "/partners", "/partners.html": "/partners", "/register": "/partners", "/join": "/partners", "/sell": "/partners", "/agreement": "/partners/agreement", "/partner/agreement": "/partners/agreement" };
+export function friendlyRedirect(request: Request): Response | null {
+  if (request.method !== "GET" && request.method !== "HEAD") return null;
+  const url = new URL(request.url);
+  if (/^\/(api|_next|assets|social|product-photos)\//i.test(url.pathname) || /\.[a-z0-9]{2,5}$/i.test(url.pathname) && !/\.html$/i.test(url.pathname)) return null;
+  let p = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
+  p = ALIASES[p] || p;
+  if (p === url.pathname) return null;
+  url.pathname = p;
+  return Response.redirect(url.toString(), 301);
+}
+
 const worker = {
   fetch(request: Request, env: Cloudflare.Env, ctx: ExecutionContext<{ CONNECTORS?: ConnectorBinding }>) {
     // Off ChatGPT Sites, platform identity headers are untrusted: remove them before any route sees them.
     if (!onChatGPTSites(env)) request = stripPlatformHeaders(request);
     if (new URL(request.url).pathname === "/.well-known/assetlinks.json") return assetLinksResponse(env);
+    const friendly = friendlyRedirect(request);
+    if (friendly) return friendly;
     let binding = ctx.props?.CONNECTORS;
     // Local preview emulates the same request-scoped capability. This branch and
     // the auxiliary service binding are absent from production builds.
