@@ -221,3 +221,8 @@ New `tests/routing.test.mjs`. All 15 test groups pass. Tests now load modules sa
 - Test: tests/store-prices.test.mjs.
 - Partner agreement v2026-11-09: partners set their own prices (update when changed, check weekly / daily for fresh food), honour the price shown on an order, and agree to side-by-side price comparison; Gulit never sets their prices.
 - Telegram: every post now has a picture (public/social/gulit-01…10.jpg) or the delivery video (gulit-delivery.mp4), sent with sendPhoto/sendVideo. Default schedule 2 posts a day, 12:00 and 19:00 Addis. deploy/once/*.sql runs small one-time data changes during deploy (guarded by marker rows); the first one switches the live channel to 2 a day and restarts the rotation.
+
+## v35 — Packaging charge per bag
+- Owner setting (Live page → rules): items per bag (default 10) and price per bag (default ETB 15 incl. VAT; 0 switches it off).
+- Charged on the **supermarket bill**: `packaging = ceil(items ÷ items per bag) × bag price`; shop bill = products + packaging. Gulit's 4% service is on products only. Recalculated when items go missing, are replaced, or the order moves store.
+- Shown in the cart, checkout and order bills (English/Amharic); storekeepers see how many bags to pack.

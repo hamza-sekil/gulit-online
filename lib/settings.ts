@@ -1,9 +1,9 @@
 import { database } from './catalog';
 
 // Owner-adjustable operating rules (settings table, key "ops").
-export type Ops = { confirmMinutes: number; offerMinutes: number; lateMinutes: number; riderWaitMinutes: number; storekeeperBonus: number };
-export const DEFAULT_OPS: Ops = { confirmMinutes: 10, offerMinutes: 5, lateMinutes: 60, riderWaitMinutes: 5, storekeeperBonus: 0 };
-const LIMITS: Record<keyof Ops, [number, number]> = { confirmMinutes: [2, 120], offerMinutes: [0, 60], lateMinutes: [15, 480], riderWaitMinutes: [1, 60], storekeeperBonus: [0, 1000000] };
+export type Ops = { confirmMinutes: number; offerMinutes: number; lateMinutes: number; riderWaitMinutes: number; storekeeperBonus: number; packItemsPerBag: number; packBagPrice: number };
+export const DEFAULT_OPS: Ops = { confirmMinutes: 10, offerMinutes: 5, lateMinutes: 60, riderWaitMinutes: 5, storekeeperBonus: 0, packItemsPerBag: 10, packBagPrice: 15 };
+const LIMITS: Record<keyof Ops, [number, number]> = { confirmMinutes: [2, 120], offerMinutes: [0, 60], lateMinutes: [15, 480], riderWaitMinutes: [1, 60], storekeeperBonus: [0, 1000000], packItemsPerBag: [1, 200], packBagPrice: [0, 10000] };
 
 export function validateOps(input: any): Ops {
   const out: any = {};

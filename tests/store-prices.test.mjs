@@ -54,21 +54,25 @@ assert.equal((await compare.POST(req('/api/catalog/compare','POST',{items:[{id:p
 const pin='9.0000, 38.7700',base={name:'Sara Alemu',phone:'0911000000',address:'Near the church, house 4',city:'Addis Ababa',inAddis:true};
 async function place(items,extra={}){const r=await orders.POST(req('/api/orders','POST',{...base,items,mapLink:'https://www.google.com/maps/search/?api=1&query=9.0000%2C38.7700',...extra}));const d=await r.json();assert.equal(r.status,201,d.error);return payload(d.order.id);}
 let o=await place([{id:p1.id,n:2}]);
-assert.equal(o.allocation.storeId,A.id);assert.equal(o.items[0].price,base1-1000);assert.equal(o.sellerTotal,(base1-1000)*2);assert.equal(o.total,o.sellerTotal+o.gulitTotal);
-o=await place([{id:p2.id,n:1}]);assert.equal(o.allocation.storeId,B.id,'B cheaper for p2');assert.equal(o.sellerTotal,base2-500);
+assert.equal(o.allocation.storeId,A.id);assert.equal(o.items[0].price,base1-1000);assert.equal(o.goodsTotal,(base1-1000)*2);assert.equal(o.total,o.sellerTotal+o.gulitTotal);
+// Packaging (default 1 bag per 10 items, ETB 15): on the supermarket bill, not in the Gulit 4% service.
+assert.equal(o.packaging,1500);assert.equal(o.sellerTotal,o.goodsTotal+1500);assert.equal(o.service,Math.round(Math.round(o.goodsTotal/1.15)*.04));
+let big=await place([{id:p1.id,n:10},{id:p2.id,n:1}]);assert.equal(big.packaging,3000,'11 items = 2 bags');
+put(A.id,p1.id,10,base1-1000);put(B.id,p1.id,10,base1+2000);put(A.id,p2.id,10,null);put(B.id,p2.id,10,base2-500); // restock
+o=await place([{id:p2.id,n:1}]);assert.equal(o.allocation.storeId,B.id,'B cheaper for p2');assert.equal(o.goodsTotal,base2-500);
 // Chosen store wins even if dearer, at its own prices.
-o=await place([{id:p1.id,n:1}],{storeId:B.id});assert.equal(o.allocation.storeId,B.id);assert.equal(o.sellerTotal,base1+2000);assert.equal(o.storeNote,undefined);
+o=await place([{id:p1.id,n:1}],{storeId:B.id});assert.equal(o.allocation.storeId,B.id);assert.equal(o.goodsTotal,base1+2000);assert.equal(o.storeNote,undefined);
 // Chosen store can't price the draft item → goes to A, customer told.
-o=await place([{id:draft.id,n:1}],{storeId:B.id});assert.equal(o.allocation.storeId,A.id);assert.equal(o.sellerTotal,12345);assert.equal(o.storeNote.used,'Bole Mart');
+o=await place([{id:draft.id,n:1}],{storeId:B.id});assert.equal(o.allocation.storeId,A.id);assert.equal(o.goodsTotal,12345);assert.equal(o.storeNote.used,'Bole Mart');
 // Unknown store id is ignored.
 o=await place([{id:p1.id,n:1}],{storeId:'nope'});assert.equal(o.allocation.storeId,A.id);
 // Public order hides internal fields.
 const pub=(await(await orders.POST(req('/api/orders','POST',{...base,items:[{id:p1.id,n:1}],storeId:B.id}))).json()).order;assert.equal(pub.preferredStore,undefined);assert.equal(pub.placedPriced,undefined);
 
 // Moving an unpaid order to another store reprices it and tells the customer.
-o=await place([{id:p1.id,n:1}]);const before=o.sellerTotal;
+o=await place([{id:p1.id,n:1}]);const before=o.goodsTotal;
 const storeB=sql.prepare('SELECT id,name,lat,lng,chapa_subaccount,commission_bps FROM stores WHERE id=?').get(B.id);
-assert.equal(await routing.moveToStore(o,storeB),true);assert.equal(o.sellerTotal,base1+2000);assert.equal(o.priceNote.from,before);assert.equal(o.priceNote.to,base1+2000);assert.equal(o.priceNote.store,'Piassa Mart');
+assert.equal(await routing.moveToStore(o,storeB),true);assert.equal(o.goodsTotal,base1+2000);assert.equal(o.priceNote.from,before);assert.equal(o.priceNote.to,base1+2000);assert.equal(o.priceNote.store,'Piassa Mart');
 
 // Storekeeper sets prices: in the app and by CSV; bad prices and unpriced draft stock refused.
 currentUser=null;let lr=await skAuth.POST(req('/api/storekeeper/auth','POST',{username:'piassa01',code:B.code}));cookieHeader=lr.headers.get('set-cookie').split(';')[0];
@@ -85,4 +89,10 @@ assert.equal(sql.prepare('SELECT price_cents,quantity FROM store_stock WHERE sto
 // Empty price keeps the existing store price on CSV import.
 imp=(await(await skImp.POST(req('/api/storekeeper/import','POST',{csv:`id,name,quantity,price\n${p1.id},x,6,\n`}))).json()).result;assert.equal(imp.updated,1);
 assert.equal(sql.prepare('SELECT price_cents FROM store_stock WHERE store_id=? AND product_id=?').get(B.id,p1.id).price_cents,9950);
-console.log('PASS: store prices — per-store prices and from-price in catalog, store-priced drafts publish, Compare & save, best-total routing, chosen store honoured or fallback with note, repricing on move, storekeeper app + CSV prices');
+// Owner can change or switch off packaging.
+currentUser=owner;const {saveOpsSettings,opsSettings}=await (async()=>{const m=await load('lib/settings.ts');if(m.status!=='evaluated')await m.evaluate();return m.namespace})();
+await saveOpsSettings({...(await opsSettings()),packItemsPerBag:5,packBagPrice:20});currentUser=null;cookieHeader='';
+big=await place([{id:p1.id,n:6}]);assert.equal(big.packaging,4000,'6 items at 5 per bag = 2 bags × ETB 20');
+assert.equal((await(await shop.GET()).json()).packaging.bagPrice,20);
+await saveOpsSettings({...(await opsSettings()),packBagPrice:0});big=await place([{id:p1.id,n:3}]);assert.equal(big.packaging,0);assert.equal(big.sellerTotal,big.goodsTotal);
+console.log('PASS: store prices + packaging per bag — per-store prices and from-price in catalog, store-priced drafts publish, Compare & save, best-total routing, chosen store honoured or fallback with note, repricing on move, storekeeper app + CSV prices');

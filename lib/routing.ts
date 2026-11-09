@@ -1,5 +1,5 @@
 import { database, catalog } from './catalog';
-import { totals, paymentState } from './orders';
+import { totals, paymentState, packFee, goodsOf } from './orders';
 import { zones, pickZone, roadKm, type Point } from './delivery';
 import { opsSettings, isOpen } from './settings';
 import { storeScores } from './stats';
@@ -37,12 +37,12 @@ export function goodsAt(prices: Map<number, number | null> | undefined, items: a
 export async function applyStorePrices(o: any, storeId: string, storeName = '') {
   const live = o.items.filter((i: any) => !i.missing);
   const prices = (await storePrices([storeId], live.map((i: any) => i.id))).get(storeId);
-  const before = o.sellerTotal;
+  const before = goodsOf(o);
   for (const i of live) { const c = prices?.get(i.id); if (typeof c === 'number') i.price = c; }
   const seller = live.reduce((s: number, i: any) => s + i.price * i.n, 0);
   const keep = ['verified', 'review'].includes(o.gulitPayment?.status) ? { service: o.service, serviceVat: o.serviceVat, gulitVat: o.gulitVat, gulitTotal: o.gulitTotal } : null;
-  Object.assign(o, totals(seller, o.delivery ?? null));
-  if (keep) { Object.assign(o, keep); o.total = o.gulitTotal === null ? null : seller + o.gulitTotal; } // Gulit bill already paid: leave it as paid
+  Object.assign(o, totals(seller, o.delivery ?? null, packFee(o.items, o.pack)));
+  if (keep) { Object.assign(o, keep); o.total = o.gulitTotal === null ? null : o.sellerTotal + o.gulitTotal; } // Gulit bill already paid: leave it as paid
   if (typeof before === 'number' && before !== seller && o.placedPriced) o.priceNote = { from: before, to: seller, store: storeName, at: Date.now() };
   o.placedPriced = true;
   o.status = paymentState(o);
@@ -96,7 +96,7 @@ export async function priceDelivery(o: any, store: { lat: number | null; lng: nu
   const from = store ? point(store) : null, to = o.customerLocation || null;
   const z = pickZone(await zones(), from && to ? roadKm(from, to) : null);
   o.deliveryZone = { zone: z.zone, km: z.km, estimated: z.estimated, label: z.label };
-  Object.assign(o, totals(o.sellerTotal, z.fee));
+  Object.assign(o, totals(goodsOf(o), z.fee, o.packaging || 0));
   o.status = paymentState(o);
 }
 
@@ -160,7 +160,7 @@ export async function routeNewOrder(o: any, now = Date.now()) {
 export function rebill(o: any, reason: string) {
   const oldSeller = o.sellerTotal, oldGulit = o.gulitTotal;
   const seller = o.items.filter((i: any) => !i.missing).reduce((s: number, i: any) => s + i.price * i.n, 0);
-  Object.assign(o, totals(seller, o.delivery));
+  Object.assign(o, totals(seller, o.delivery, packFee(o.items, o.pack)));
   if (o.sellerPayment?.status === 'verified') addRefund(o, 'seller', oldSeller - o.sellerTotal, reason);
   if (o.gulitPayment?.status === 'verified' && oldGulit !== null && o.gulitTotal !== null) addRefund(o, 'gulit', oldGulit - o.gulitTotal, 'service charge on ' + reason);
   if (!o.items.some((i: any) => !i.missing)) {
