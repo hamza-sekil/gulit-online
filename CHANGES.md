@@ -211,3 +211,11 @@ New `tests/routing.test.mjs`. All 15 test groups pass. Tests now load modules sa
 - 24 bilingual (Amharic + English) "coming soon" posts for customers, partner businesses and riders in lib/telegram-posts.ts; rotate in order.
 - Posted by the existing every-minute Cloudflare cron (worker scheduled → postIfDue); each slot claimed in the database so a post is never sent twice.
 - New secret TELEGRAM_BOT_TOKEN (added to `gulit-deploy.mjs secrets`). Test: tests/telegram.test.mjs.
+
+## v34 — Each supermarket's own price, choose your supermarket, Compare & save
+- Migration 0014: `store_stock.price_cents` — each partner's own VAT-inclusive shelf price (empty = Gulit base price). Draft items (no base price) go on sale as soon as a partner prices them.
+- Storekeeper app: "Your shelf price" field per item; CSV stock list gains `price` (and read-only `gulit_price`) columns. Owner stock import accepts `price` too.
+- Shop: "🏷️ Best price · all supermarkets" picker (or one supermarket). Product cards show "from ETB …" when prices differ; product page lists each supermarket's price.
+- Cart: **Compare & save** — the bag priced at every supermarket, lowest marked, "Shop here" to switch (`POST /api/catalog/compare`).
+- Orders charge the supplying supermarket's own prices. "Best price" routes to the lowest products + delivery total; a chosen supermarket is used first, otherwise the order falls back and the customer sees why. Moving an unpaid order to another store reprices it and shows the change. Replacement offers use the store's own price.
+- Test: tests/store-prices.test.mjs.

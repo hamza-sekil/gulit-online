@@ -1,6 +1,6 @@
 import { database, catalog } from './catalog';
 import { paymentState } from './orders';
-import { eligibleStores, reserveAt, giveBack, linkStore, priceDelivery, startConfirmClock, rebill, expireStale } from './routing';
+import { bestStores, reserveAt, giveBack, linkStore, priceDelivery, startConfirmClock, rebill, expireStale, applyStorePrices } from './routing';
 import { opsSettings } from './settings';
 import { roadKm, type Point } from './delivery';
 import { notifyOrder, cleanupOrderPush } from './order-push';
@@ -34,13 +34,14 @@ async function rerouteLate(now: number) {
     let moved = null;
     if (sellerOpen && !paying?.n) {
       const tried = o.missedConfirm.map((m: any) => m.storeId);
-      for (const store of (await eligibleStores(items, o.customerLocation || null, tried, now)) || []) {
+      for (const store of (await bestStores(items, o.customerLocation || null, tried, now)) || []) {
         if (await reserveAt(store.id, items)) { moved = store; break; }
       }
     }
     if (moved) {
       o.allocation = { storeId: moved.id, storeName: moved.name, reserved: true, at: now };
       linkStore(o, moved);
+      await applyStorePrices(o, moved.id, moved.name);
       if (o.inAddis && !['verified', 'review'].includes(o.gulitPayment?.status)) await priceDelivery(o, moved);
       await startConfirmClock(o, now);
       addAlert(o, 'moved', `${old.storeName} did not confirm in time. Order moved to ${moved.name}.`, now);
@@ -60,11 +61,12 @@ export async function findReplacement(o: any, item: any, storeId: string) {
   const products = await catalog(false, false), byId = new Map(products.map(p => [p.id, p]));
   const original = byId.get(item.id); if (!original) return null;
   const inOrder = new Set(o.items.map((i: any) => i.id));
-  const rows = (await database().prepare('SELECT product_id,quantity FROM store_stock WHERE store_id=? AND quantity>=?').bind(storeId, item.n).all()).results as any[];
+  const rows = (await database().prepare('SELECT product_id,quantity,price_cents FROM store_stock WHERE store_id=? AND quantity>=?').bind(storeId, item.n).all()).results as any[];
   let best: any = null;
   for (const r of rows) {
-    const p: any = byId.get(r.product_id); if (!p || p.draft || inOrder.has(p.id) || p.cat !== original.cat) continue;
-    const price = Math.round(p.price * 100);
+    const p: any = byId.get(r.product_id); if (!p || inOrder.has(p.id) || p.cat !== original.cat) continue;
+    const price = r.price_cents ?? (p.draft ? null : Math.round(p.price * 100)); // this supermarket's own price
+    if (price === null) continue;
     if (price > item.price || price < item.price * 0.7) continue;
     if (!best || Math.abs(item.price - price) < Math.abs(item.price - best.price)) best = { id: p.id, name: p.name, price, n: item.n };
   }

@@ -76,28 +76,31 @@ export async function importStock(text: string, by: string, storeId: string | nu
     if (!sid) { result.errors.push(`Line ${r.line}: supermarket "${r.get('store_username')}" not found or not active.`); continue; }
     const p: any = live.get(id);
     if (!p) { result.errors.push(`Line ${r.line}: product ${r.get('id')} not found or archived.`); continue; }
-    if (p.draft) { result.errors.push(`Line ${r.line}: ${p.name} has no confirmed price yet. Add its price first.`); continue; }
+    const pRaw = r.get('price') ?? '';
+    let priceCents: number | null = null;
+    if (pRaw !== '') { const v = num(pRaw); if (!Number.isFinite(v) || v <= 0 || v > 100000000) { result.errors.push(`Line ${r.line}: price "${pRaw}" must be a number in birr.`); continue; } priceCents = Math.round(v * 100); }
+    if (p.draft && priceCents === null) { result.errors.push(`Line ${r.line}: ${p.name} has no Gulit price yet. Add your price in the price column.`); continue; }
     const q = num(qRaw);
     if (!Number.isSafeInteger(q) || q < 0 || q > 100000000) { result.errors.push(`Line ${r.line}: quantity "${qRaw}" must be a whole number of 0 or more.`); continue; }
     let dates;
     try { dates = validateProductDates({ manufacturingDate: r.get('manufacturing_date') || null, expiryDate: r.get('expiry_date') || null }); } catch (e) { result.errors.push(`Line ${r.line}: ${e instanceof Error ? e.message : 'invalid date'}`); continue; }
-    const upd = await db.prepare('UPDATE store_stock SET quantity=?,manufacturing_date=COALESCE(?,manufacturing_date),expiry_date=COALESCE(?,expiry_date),revision=revision+1,updated_at=?,updated_by=? WHERE store_id=? AND product_id=?').bind(q, dates.manufacturingDate, dates.expiryDate, Date.now(), by, sid, id).run();
+    const upd = await db.prepare('UPDATE store_stock SET quantity=?,price_cents=COALESCE(?,price_cents),manufacturing_date=COALESCE(?,manufacturing_date),expiry_date=COALESCE(?,expiry_date),revision=revision+1,updated_at=?,updated_by=? WHERE store_id=? AND product_id=?').bind(q, priceCents, dates.manufacturingDate, dates.expiryDate, Date.now(), by, sid, id).run();
     if (upd.meta.changes) { result.updated++; continue; }
     if (!assignNew) { result.errors.push(`Line ${r.line}: ${p.name} is not assigned to your supermarket. Ask Gulit to assign it.`); continue; }
-    await db.prepare('INSERT INTO store_stock (store_id,product_id,quantity,manufacturing_date,expiry_date,revision,updated_at,updated_by) VALUES (?,?,?,?,?,1,?,?) ON CONFLICT(store_id,product_id) DO NOTHING').bind(sid, id, q, dates.manufacturingDate, dates.expiryDate, Date.now(), by).run();
+    await db.prepare('INSERT INTO store_stock (store_id,product_id,quantity,price_cents,manufacturing_date,expiry_date,revision,updated_at,updated_by) VALUES (?,?,?,?,?,?,1,?,?) ON CONFLICT(store_id,product_id) DO NOTHING').bind(sid, id, q, priceCents, dates.manufacturingDate, dates.expiryDate, Date.now(), by).run();
     result.added++;
   }
   return result;
 }
 
 export async function stockTemplate(storeId: string | null) {
-  const db = database(), live = (await catalog(false, false)).filter((p: any) => !p.draft);
+  const db = database(), all = await catalog(false, false);
   if (storeId) {
-    const rows = (await db.prepare('SELECT product_id,quantity,manufacturing_date,expiry_date FROM store_stock WHERE store_id=?').bind(storeId).all()).results as any[];
-    const byId = new Map(live.map((p: any) => [p.id, p]));
-    return toCsv([['id', 'name', 'quantity', 'manufacturing_date', 'expiry_date'], ...rows.filter(r => byId.has(r.product_id)).map(r => [r.product_id, (byId.get(r.product_id) as any).name, r.quantity, r.manufacturing_date || '', r.expiry_date || ''])]);
+    const rows = (await db.prepare('SELECT product_id,quantity,price_cents,manufacturing_date,expiry_date FROM store_stock WHERE store_id=?').bind(storeId).all()).results as any[];
+    const byId = new Map(all.map((p: any) => [p.id, p]));
+    return toCsv([['id', 'name', 'quantity', 'price', 'gulit_price', 'manufacturing_date', 'expiry_date'], ...rows.filter(r => byId.has(r.product_id)).map(r => { const p: any = byId.get(r.product_id); return [r.product_id, p.name, r.quantity, r.price_cents == null ? '' : r.price_cents / 100, p.draft ? '' : p.price, r.manufacturing_date || '', r.expiry_date || '']; })]);
   }
-  return toCsv([['store_username', 'id', 'name', 'quantity', 'manufacturing_date', 'expiry_date'], ...live.map((p: any) => ['', p.id, p.name, '', '', ''])]);
+  return toCsv([['store_username', 'id', 'name', 'quantity', 'price', 'manufacturing_date', 'expiry_date'], ...all.map((p: any) => ['', p.id, p.name, '', '', '', ''])]);
 }
 
 // Reference photos (taken from other shops' websites while building the catalogue) must be replaced before public launch.

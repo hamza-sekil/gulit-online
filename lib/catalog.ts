@@ -9,7 +9,16 @@ export async function catalog(includeArchived=false,includeStoreStock=true){
  for(const row of data.results as any[]){all.set(row.id,{photoKind:row.image==='/icon-512.png'||row.image===all.get(row.id)?.image?all.get(row.id)?.photoKind:undefined,brand:all.get(row.id)?.brand,group:all.get(row.id)?.group,id:row.id,name:row.name,cat:row.category,price:row.price_cents/100,stock:row.stock,manufacturingDate:row.manufacturing_date,expiryDate:row.expiry_date,image:row.image==='/icon-512.png'?(all.get(row.id)?.image||row.image):row.image,badge:"Gulit collection",revision:row.revision,archived:row.archived});}
  if(includeStoreStock){
  const stocks=await database().prepare('SELECT x.*,s.name AS store_name,s.active AS store_active FROM store_stock x JOIN stores s ON s.id=x.store_id').all();
- for(const row of stocks.results as any[]){const p=all.get(row.product_id);if(!p)continue;if(!p.storeStock){p.storeStock=[];p.stockManaged=true;p.stock=0;}if(!row.store_active)continue;p.stock+=row.quantity;p.storeStock.push({storeId:row.store_id,storeName:row.store_name,quantity:row.quantity,manufacturingDate:row.manufacturing_date,expiryDate:row.expiry_date,checked:row.updated_by!=='pending',updatedAt:row.updated_at});}
+ for(const row of stocks.results as any[]){const p=all.get(row.product_id);if(!p)continue;if(!p.storeStock){p.storeStock=[];p.stockManaged=true;p.stock=0;}if(!row.store_active)continue;p.stock+=row.quantity;p.storeStock.push({storeId:row.store_id,storeName:row.store_name,quantity:row.quantity,ownPrice:row.price_cents==null?null:row.price_cents/100,manufacturingDate:row.manufacturing_date,expiryDate:row.expiry_date,checked:row.updated_by!=='pending',updatedAt:row.updated_at});}
+ // Each supermarket sells at its own price (store_stock.price_cents). Without one it sells at the Gulit base price,
+ // except draft items (no base price yet), which a store can only sell once it sets its own price.
+ for(const p of all.values())if(p.storeStock){
+  for(const s of p.storeStock)s.price=s.ownPrice??(p.draft?null:p.price);
+  const sellable=p.storeStock.filter((s:any)=>s.price!==null&&s.quantity>0&&s.checked);
+  p.stock=p.storeStock.filter((s:any)=>s.price!==null).reduce((n:number,s:any)=>n+s.quantity,0);
+  if(sellable.length){p.fromPrice=Math.min(...sellable.map((s:any)=>s.price));p.priceVaries=new Set(sellable.map((s:any)=>s.price)).size>1;}
+  if(p.draft&&p.storeStock.some((s:any)=>s.ownPrice!==null)){p.draft=false;p.badge='Supermarket price';p.price=p.fromPrice??Math.min(...p.storeStock.filter((s:any)=>s.ownPrice!==null).map((s:any)=>s.ownPrice));}
+ }
  for(const p of all.values())if(p.storeStock){const m=new Set(p.storeStock.map((x:any)=>x.manufacturingDate)),e=new Set(p.storeStock.map((x:any)=>x.expiryDate));p.datesVary=m.size>1||e.size>1;p.manufacturingDate=m.size===1?[...m][0]:null;p.expiryDate=e.size===1?[...e][0]:null;}
  }
  return [...all.values()].filter(p=>includeArchived||!p.archived);

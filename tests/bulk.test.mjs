@@ -36,12 +36,12 @@ r=(await(await R.imp.POST(req('/api/admin/import','POST',{kind:'prices',csv:`id,
 // Stock import (owner, by store username) auto-assigns; drafts refused; bad quantities refused
 const st=await(await R.stores.POST(req('/api/admin/stores','POST',{name:'Bole Mart',username:'bole01'}))).json();
 r=(await(await R.imp.POST(req('/api/admin/import','POST',{kind:'stock',csv:`store_username,id,quantity,expiry_date\nbole01,${a[0]},12,2027-01-31\nnope01,${a[0]},1,\nbole01,${b[0]},3,\nbole01,${a[0]},1.5,\nbole01,${a[0]},2,2027-02-30\n`}))).json()).result;
-assert.equal(r.added,1);assert.equal(r.errors.length,4);assert.match(r.errors.join('|'),/not found/);assert.match(r.errors.join('|'),/no confirmed price/);
+assert.equal(r.added,1);assert.equal(r.errors.length,4);assert.match(r.errors.join('|'),/not found/);assert.match(r.errors.join('|'),/no Gulit price yet/);
 assert.equal(sql.prepare('SELECT quantity,expiry_date FROM store_stock WHERE store_id=? AND product_id=?').get(st.id,Number(a[0])).quantity,12);
 // Storekeeper: download own list, update quantities only for assigned products
 currentUser=null;let lr=await R.skAuth.POST(req('/api/storekeeper/auth','POST',{username:'bole01',code:st.code}));cookieHeader=lr.headers.get('set-cookie').split(';')[0];
-const mine=R.bulk.parseCsv(await(await R.skImp.GET(req('/api/storekeeper/import'))).text());same(mine[0],['id','name','quantity','manufacturing_date','expiry_date']);assert.equal(mine.length,2);
-r=(await(await R.skImp.POST(req('/api/storekeeper/import','POST',{csv:`id,name,quantity\n${a[0]},x,7\n${c[0]},y,4\n`}))).json()).result;assert.equal(r.updated,1);assert.match(r.errors[0],/not assigned|no confirmed price/);
+const mine=R.bulk.parseCsv(await(await R.skImp.GET(req('/api/storekeeper/import'))).text());same(mine[0],['id','name','quantity','price','gulit_price','manufacturing_date','expiry_date']);assert.equal(mine.length,2);
+r=(await(await R.skImp.POST(req('/api/storekeeper/import','POST',{csv:`id,name,quantity\n${a[0]},x,7\n${c[0]},y,4\n`}))).json()).result;assert.equal(r.updated,1);assert.match(r.errors[0],/not assigned|no Gulit price yet/);
 assert.equal(sql.prepare('SELECT quantity FROM store_stock WHERE store_id=? AND product_id=?').get(st.id,Number(a[0])).quantity,7);cookieHeader='';
 // Reference photos hidden in the public shop when switched on
 currentUser={userId:'o',email:'owner@example.test'};assert.equal((await R.imp.POST(req('/api/admin/import','POST',{kind:'photos',hideReference:true}))).status,200);currentUser=null;

@@ -1,4 +1,4 @@
-import { database } from './catalog';
+import { database, catalog } from './catalog';
 import { totals, paymentState } from './orders';
 import { zones, pickZone, roadKm, type Point } from './delivery';
 import { opsSettings, isOpen } from './settings';
@@ -12,6 +12,41 @@ import { storeScores } from './stats';
 export const HOLD_MS = 24 * 3600 * 1000;
 
 type StoreRow = { id: string; name: string; lat: number | null; lng: number | null; chapa_subaccount: string | null; commission_bps: number; open_time?: string | null; close_time?: string | null; radius_km?: number | null };
+
+/** Each store's own price (cents) for these products: store price, else the Gulit base price. null = this store can't sell it. */
+export async function storePrices(storeIds: string[], productIds: number[]) {
+  const out = new Map<string, Map<number, number | null>>();
+  if (!storeIds.length || !productIds.length) return out;
+  const want = new Set(productIds);
+  const base = new Map((await catalog(true, false)).filter((p: any) => want.has(p.id)).map((p: any) => [p.id, p.draft ? null : Math.round(p.price * 100)]));
+  const rows = (await database().prepare(`SELECT store_id,product_id,price_cents FROM store_stock WHERE store_id IN (${storeIds.map(() => '?').join(',')}) AND product_id IN (${productIds.map(() => '?').join(',')})`).bind(...storeIds, ...productIds).all()).results as any[];
+  for (const r of rows) {
+    if (!out.has(r.store_id)) out.set(r.store_id, new Map());
+    const own = r.price_cents, b = base.get(r.product_id);
+    out.get(r.store_id)!.set(r.product_id, own ?? (typeof b === 'number' && b > 0 ? b : null));
+  }
+  return out;
+}
+/** The order's goods total if this store supplies it, or null if any item has no price there. */
+export function goodsAt(prices: Map<number, number | null> | undefined, items: any[]) {
+  let sum = 0;
+  for (const i of items) { const c = prices?.get(i.id); if (typeof c !== 'number') return null; sum += c * i.n; }
+  return sum;
+}
+/** Switches item prices to this store's prices and recalculates both bills. Records a note when the goods total changed. */
+export async function applyStorePrices(o: any, storeId: string, storeName = '') {
+  const live = o.items.filter((i: any) => !i.missing);
+  const prices = (await storePrices([storeId], live.map((i: any) => i.id))).get(storeId);
+  const before = o.sellerTotal;
+  for (const i of live) { const c = prices?.get(i.id); if (typeof c === 'number') i.price = c; }
+  const seller = live.reduce((s: number, i: any) => s + i.price * i.n, 0);
+  const keep = ['verified', 'review'].includes(o.gulitPayment?.status) ? { service: o.service, serviceVat: o.serviceVat, gulitVat: o.gulitVat, gulitTotal: o.gulitTotal } : null;
+  Object.assign(o, totals(seller, o.delivery ?? null));
+  if (keep) { Object.assign(o, keep); o.total = o.gulitTotal === null ? null : seller + o.gulitTotal; } // Gulit bill already paid: leave it as paid
+  if (typeof before === 'number' && before !== seller && o.placedPriced) o.priceNote = { from: before, to: seller, store: storeName, at: Date.now() };
+  o.placedPriced = true;
+  o.status = paymentState(o);
+}
 
 async function storesWithAll(items: any[]): Promise<StoreRow[] | null> {
   const db = database(), ids = items.map(i => i.id);
@@ -77,6 +112,23 @@ export async function eligibleStores(items: any[], to: Point | null, exclude: st
   return list.sort((a, b) => dist(a) - dist(b) || score(b) - score(a) || a.name.localeCompare(b.name));
 }
 
+/** Eligible stores ordered for the customer: the store they chose first; then the lowest goods + delivery total
+ *  ("Compare & save"); stores that can't price every item are left out. */
+export async function bestStores(items: any[], to: Point | null, exclude: string[] = [], now = Date.now(), preferred?: string) {
+  const list = await eligibleStores(items, to, exclude, now);
+  if (!list?.length) return list;
+  const prices = await storePrices(list.map(s => s.id), items.map((i: any) => i.id)), zs = await zones();
+  const cost = new Map<string, number>();
+  for (const s of list) {
+    const goods = goodsAt(prices.get(s.id), items);
+    if (goods === null) continue;
+    const p = point(s), fee = pickZone(zs, p && to ? roadKm(p, to) : null).fee;
+    cost.set(s.id, goods + Math.round(fee * 1.15));
+  }
+  const ok = list.filter(s => cost.has(s.id)), rank = new Map(ok.map((s, i) => [s.id, i]));
+  return ok.sort((a, b) => (preferred ? (b.id === preferred ? 1 : 0) - (a.id === preferred ? 1 : 0) : 0) || cost.get(a.id)! - cost.get(b.id)! || rank.get(a.id)! - rank.get(b.id)!);
+}
+
 /** Starts the supermarket confirmation clock for the currently allocated store. */
 export async function startConfirmClock(o: any, now = Date.now()) {
   const ops = await opsSettings();
@@ -88,11 +140,13 @@ export async function startConfirmClock(o: any, now = Date.now()) {
 export async function routeNewOrder(o: any, now = Date.now()) {
   o.timeline = { ...(o.timeline || {}), placed: now };
   const to: Point | null = o.customerLocation || null;
-  const candidates = await eligibleStores(o.items, to, [], now);
+  const candidates = await bestStores(o.items, to, [], now, o.preferredStore);
   for (const store of candidates || []) {
     if (await reserveAt(store.id, o.items)) {
       o.allocation = { storeId: store.id, storeName: store.name, reserved: true, at: now };
+      if (o.preferredStore && o.preferredStore !== store.id) o.storeNote = { chosen: o.preferredStoreName || '', used: store.name };
       linkStore(o, store);
+      await applyStorePrices(o, store.id, store.name);
       await priceDelivery(o, store);
       await startConfirmClock(o, now);
       return o;
@@ -134,6 +188,7 @@ export async function moveToStore(o: any, store: StoreRow) {
   if (o.allocation?.reserved) await giveBack(o.allocation.storeId, items);
   o.allocation = { storeId: store.id, storeName: store.name, reserved: true, at: Date.now() };
   linkStore(o, store);
+  await applyStorePrices(o, store.id, store.name);
   await startConfirmClock(o);
   const gulit = o.gulitPayment?.status;
   if (o.inAddis && !['verified', 'review'].includes(gulit)) await priceDelivery(o, store);
