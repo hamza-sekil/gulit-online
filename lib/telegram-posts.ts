@@ -25,11 +25,11 @@ Pick, pay, relax — our riders deliver across Addis. Coming soon!` },
 
 💳 <b>Pay with Telebirr, CBE Birr or card</b>
 Safe online payment, checked before your order moves. Coming soon on Gulit.` },
-{ photo: 'gulit-04.jpg', text: `🥬 <b>ፍራፍሬ፣ አትክልት፣ ወተት፣ ዳቦ — ሁሉም በአንድ ቦታ</b>
+{ photo: 'gulit-04.jpg', text: `🥬 <b>ፍራፍሬ፣ አትክልት፣ ወተት — ሁሉም በአንድ ቦታ</b>
 ቡና፣ ዘይት፣ ስኳር፣ ሳሙና እና የቤት ዕቃዎችም።
 
 🥬 <b>Your weekly shop in one place</b>
-Fruit, veg, milk, bread, coffee, oil, soap… What's always on your list? 👇` },
+Fruit, veg, milk, coffee, oil, soap… What's always on your list? 👇` },
 { photo: 'gulit-05.jpg', text: `✅ <b>ዕቃ ካለቀ እርስዎ ይመርጣሉ</b>
 ምትክ ይምረጡ ወይም አይከፍሉበትም። ያለፈቃድዎ ምንም አይቀየርም።
 
