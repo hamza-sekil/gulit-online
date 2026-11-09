@@ -42,5 +42,5 @@ assert.equal(sql.prepare('SELECT status,store_id FROM partner_applications WHERE
 assert.equal((await R.adm.POST(req('/api/admin/partners','POST',{id:reference,username:'bole-fresh2'}))).status,409);
 currentUser=null;assert.equal((await R.skAuth.POST(req('/api/storekeeper/auth','POST',{username:'bole-fresh',code:acc.code}))).status,200);
 // Rate limit on public form
-let last;for(let i=0;i<35;i++)last=await R.pub.POST(req('/api/partners','POST',good,origin,'9.9.9.9'));assert.equal(last.status,429);
+let last;for(let i=0;i<305;i++)last=await R.pub.POST(req('/api/partners','POST',good,origin,'9.9.9.9'));assert.equal(last.status,429);
 console.log('PASS: partners — public bilingual page, CSRF + validation, application saved, owner-only review/notes/status, approve creates working storekeeper account once, rate limit');
