@@ -7,7 +7,7 @@ import { postIfDue } from "../lib/telegram";
 
 // People type or share links in many forms ("Gulitonline.com/Partners", "/partner", "/partners.html"):
 // send them to the real page instead of a 404. API, asset and app paths are left alone.
-const ALIASES: Record<string, string> = { "/partner": "/partners", "/partners.html": "/partners", "/register": "/partners", "/join": "/partners", "/sell": "/partners", "/agreement": "/partners/agreement", "/partner/agreement": "/partners/agreement" };
+const ALIASES: Record<string, string> = { "/partner": "/partners", "/partners.html": "/partners", "/register": "/partners", "/join": "/partners", "/sell": "/partners", "/agreement": "/partners/agreement", "/partner/agreement": "/partners/agreement", "/owner": "/admin", "/owners": "/admin", "/login": "/admin/login", "/owner/login": "/admin/login", "/dashboard": "/admin", "/applications": "/admin/partners", "/owner/partners": "/admin/partners", "/owner/applications": "/admin/partners", "/supermarket": "/storekeeper", "/store": "/storekeeper", "/rider": "/driver" };
 export function friendlyRedirect(request: Request): Response | null {
   if (request.method !== "GET" && request.method !== "HEAD") return null;
   const url = new URL(request.url);
