@@ -25,7 +25,7 @@ assert.equal((await R.pub.POST(req('/api/partners','POST',good,'https://evil.tes
 for(const [k,v,m] of [['businessType','Casino',/type of business/],['supermarket','',/name/],['phone','12',/phone/],['agree',false,/agreement/],['email','nope',/email/],['mapLink','javascript:alert(1)',/https/],['size','huge',/products/]]){const r=await R.pub.POST(req('/api/partners','POST',{...good,[k]:v}));assert.equal(r.status,400);assert.match((await r.json()).error,m);}
 // Save
 let r=await R.pub.POST(req('/api/partners','POST',good));assert.equal(r.status,201);const {reference}=await r.json();assert.match(reference,/^SUP-/);
-const row=sql.prepare('SELECT * FROM partner_applications WHERE id=?').get(reference);assert.equal(row.status,'new');same(JSON.parse(row.payload).categories,['Bakery','Drinks']);assert.equal(JSON.parse(row.payload).agreementVersion,'2026-11-08');assert.ok(JSON.parse(row.payload).agreedAt>0);
+const row=sql.prepare('SELECT * FROM partner_applications WHERE id=?').get(reference);assert.equal(row.status,'new');same(JSON.parse(row.payload).categories,['Bakery','Drinks']);assert.equal(JSON.parse(row.payload).agreementVersion,'2026-11-09');assert.ok(JSON.parse(row.payload).agreedAt>0);
 // Owner only
 assert.equal((await R.adm.GET(req('/api/admin/partners'))).status,403);assert.equal((await R.apage.GET()).status,303);
 currentUser={userId:'o',email:'owner@example.test'};assert.equal((await R.apage.GET()).status,200);

@@ -219,3 +219,4 @@ New `tests/routing.test.mjs`. All 15 test groups pass. Tests now load modules sa
 - Cart: **Compare & save** — the bag priced at every supermarket, lowest marked, "Shop here" to switch (`POST /api/catalog/compare`).
 - Orders charge the supplying supermarket's own prices. "Best price" routes to the lowest products + delivery total; a chosen supermarket is used first, otherwise the order falls back and the customer sees why. Moving an unpaid order to another store reprices it and shows the change. Replacement offers use the store's own price.
 - Test: tests/store-prices.test.mjs.
+- Partner agreement v2026-11-09: partners set their own prices (update when changed, check weekly / daily for fresh food), honour the price shown on an order, and agree to side-by-side price comparison; Gulit never sets their prices.
