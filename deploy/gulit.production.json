@@ -14,6 +14,6 @@
   "crons": [
     "* * * * *"
   ],
-  "telegramChannel": "@heksupermarket",
+  "telegramChannel": "@gulitonline1",
   "telegramPostNow": "media-2026-11-09"
 }
