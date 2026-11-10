@@ -60,7 +60,10 @@ export async function postIfDue(now = Date.now()) {
   const now1 = once && s.postNow !== once;
   const slot = slotFor(s, now);
   if (!now1 && (!slot || slot === s.lastSlot)) return 'not-due';
-  const i = s.next % POSTS.length, claimed = now1 ? { ...s, postNow: once, next: i + 1 } : { ...s, lastSlot: slot!, next: i + 1 };
+  // A TELEGRAM_POST_NOW value that matches a post id sends that post (rotation unchanged); otherwise the next post.
+  const named = now1 ? POSTS.findIndex(p => p.id === once) : -1;
+  const i = named >= 0 ? named : s.next % POSTS.length;
+  const claimed = now1 ? { ...s, postNow: once, next: named >= 0 ? s.next : i + 1 } : { ...s, lastSlot: slot!, next: i + 1 };
   if (!await save(claimed, raw)) return 'busy';
   let err = '';
   try { await sendTelegram(s.channel, POSTS[i]); } catch (e) { err = e instanceof Error ? e.message : 'failed'; }

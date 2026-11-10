@@ -1,6 +1,7 @@
 // Telegram channel posts (Amharic + English), each with a picture or the delivery video served from gulitonline.com/social/.
 // They rotate in order. Captions: Telegram HTML (<b>, <i>, <a>), max 1024 characters.
-export type Post = { text: string; photo?: string; video?: string };
+// id: a post can be sent once, right away, by setting telegramPostNow in deploy/gulit.production.json to its id.
+export type Post = { id?: string; text: string; photo?: string; video?: string };
 export const MEDIA_BASE = 'https://gulitonline.com/social/';
 export const POSTS: Post[] = [
 { video: 'gulit-delivery.mp4', text: `🛵 <b>ከሱፐርማርኬት እስከ ቤትዎ!</b>
@@ -61,4 +62,12 @@ One tap to switch — the whole app follows you. Coming soon!` },
 
 🧾 <b>See every birr before you pay</b>
 Products, service fee and delivery shown upfront — and compare supermarkets to save. Coming soon to Addis!` },
+{ id: 'mep-2026-11-10', video: 'gulit-mep.mp4', text: `🛠 <b>የቧንቧ፣ የኤሌክትሪክ እና የመካኒካል ሥራ በጉሊት!</b>
+ለቤት፣ ለቢሮ እና ለፋብሪካ። ቧንቧ ፈሰሰ? መብራት ተበላሸ? ኤሲ ወይም ቀዝቃዛ ክፍል አይሰራም? ይዘዙ — ባለሙያ መጥቶ አይቶ ዋጋ ይነግርዎታል፤ እርስዎ ሲስማሙ ይሰራል።
+
+🛠 <b>MEP services by Gulit</b>
+Plumbing · Electrical · Mechanical — for homes, offices and factories. Leaks, wiring, panels, pumps, AC, cold rooms and chillers. A trusted engineer inspects first and you approve the price before work starts.
+
+👉 <a href="https://gulitonline.com/mep?s=telegram">gulitonline.com/mep</a>
+📞 +251 909 225 566 · +251 910 828 617` },
 ];
