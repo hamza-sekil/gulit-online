@@ -48,8 +48,8 @@ await R.api.POST(req('/api/admin/telegram','POST',{enabled:false}));assert.equal
 const h=await(await R.page.GET()).text();new Function(h.split('<script>')[1].split('</script>')[0]);
 console.log('PASS: telegram — bilingual picture/video posts, owner-only settings + validation, 2 posts a day (12:00, 19:00 Addis), never twice per slot, rotation, post-now, errors recorded, off switch');
 // Named one-off post (TELEGRAM_POST_NOW = a post id) sends that post and leaves the rotation alone
-{const mepIdx=P.findIndex(p=>p.id==='mep-2026-11-10');assert.ok(mepIdx>=0&&P[mepIdx].video==='gulit-mep.mp4');
-await R.api.POST(req('/api/admin/telegram','POST',{enabled:true,channel:'@gulitonline'}));const before=(await R.tg.tgSettings()).s.next;env.TELEGRAM_POST_NOW='mep-2026-11-10';
-assert.equal(await R.tg.postIfDue(at(11,9)),'sent');assert.equal(sentMsgs.at(-1).b.video,'https://gulitonline.com/social/gulit-mep.mp4');assert.equal((await R.tg.tgSettings()).s.next,before,'rotation unchanged');
+{const mepIdx=P.findIndex(p=>p.id==='mep-real-2026-11-10');assert.ok(mepIdx>=0&&P[mepIdx].video==='gulit-mep-real.mp4');
+await R.api.POST(req('/api/admin/telegram','POST',{enabled:true,channel:'@gulitonline'}));const before=(await R.tg.tgSettings()).s.next;env.TELEGRAM_POST_NOW='mep-real-2026-11-10';
+assert.equal(await R.tg.postIfDue(at(11,9)),'sent');assert.equal(sentMsgs.at(-1).b.video,'https://gulitonline.com/social/gulit-mep-real.mp4');assert.equal((await R.tg.tgSettings()).s.next,before,'rotation unchanged');
 assert.equal(await R.tg.postIfDue(at(11,9,1)),'not-due','only once');delete env.TELEGRAM_POST_NOW;
 console.log('PASS: named one-off post');}

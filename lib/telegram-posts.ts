@@ -62,7 +62,7 @@ One tap to switch — the whole app follows you. Coming soon!` },
 
 🧾 <b>See every birr before you pay</b>
 Products, service fee and delivery shown upfront — and compare supermarkets to save. Coming soon to Addis!` },
-{ id: 'mep-2026-11-10', video: 'gulit-mep.mp4', text: `🛠 <b>የቧንቧ፣ የኤሌክትሪክ እና የመካኒካል ሥራ በጉሊት!</b>
+{ id: 'mep-real-2026-11-10', video: 'gulit-mep-real.mp4', text: `🛠 <b>የቧንቧ፣ የኤሌክትሪክ እና የመካኒካል ሥራ በጉሊት!</b>
 ለቤት፣ ለቢሮ እና ለፋብሪካ። ቧንቧ ፈሰሰ? መብራት ተበላሸ? ኤሲ ወይም ቀዝቃዛ ክፍል አይሰራም? ይዘዙ — ባለሙያ መጥቶ አይቶ ዋጋ ይነግርዎታል፤ እርስዎ ሲስማሙ ይሰራል።
 
 🛠 <b>MEP services by Gulit</b>
