@@ -51,8 +51,8 @@ const base={name:'Sara Alemu',phone:'0911000000',address:'Near the church, house
 r=await orders.POST(req('/api/orders','POST',{...base,items:[{id:shirt,n:5},{id:suit,n:1}],storeId:L1.id}));let d=await r.json();assert.equal(r.status,201,d.error);
 const o=payload(d.order.id);
 assert.equal(o.laundry,true);assert.equal(o.allocation.storeId,L1.id);assert.equal(o.goodsTotal,5*6000+35000);assert.equal(o.packaging,0);
-assert.equal(o.deliveryZone.trips,2);assert.match(o.deliveryZone.label,/pickup and return/);
-const zones=(await load('lib/delivery.ts')).namespace;const oneTrip=zones.DEFAULT_ZONES[0].fee;assert.equal(o.delivery,oneTrip*2,'2 trips (both laundries ~1 km away: zone 1)');
+assert.equal(o.deliveryZone.trips,1);
+const zones=(await load('lib/delivery.ts')).namespace;const oneTrip=zones.DEFAULT_ZONES[0].fee;assert.equal(o.delivery,oneTrip,'same delivery price as a supermarket order');assert.equal(o.service,Math.round(Math.round(o.goodsTotal/1.15)*.04),'same 4% service');
 assert.equal(sql.prepare('SELECT quantity FROM store_stock WHERE store_id=? AND product_id=?').get(L1.id,shirt).quantity,1,'service capacity not used up');
 // Photo checks: the customer sends a photo of a stained shirt; the laundry refuses it, so one shirt comes off the bill.
 const orderToken=d.token,orderId=d.order.id;
