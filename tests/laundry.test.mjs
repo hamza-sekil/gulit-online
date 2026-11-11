@@ -54,6 +54,35 @@ assert.equal(o.laundry,true);assert.equal(o.allocation.storeId,L1.id);assert.equ
 assert.equal(o.deliveryZone.trips,2);assert.match(o.deliveryZone.label,/pickup and return/);
 const zones=(await load('lib/delivery.ts')).namespace;const oneTrip=zones.DEFAULT_ZONES[0].fee;assert.equal(o.delivery,oneTrip*2,'2 trips (both laundries ~1 km away: zone 1)');
 assert.equal(sql.prepare('SELECT quantity FROM store_stock WHERE store_id=? AND product_id=?').get(L1.id,shirt).quantity,1,'service capacity not used up');
+// Photo checks: the customer sends a photo of a stained shirt; the laundry refuses it, so one shirt comes off the bill.
+const orderToken=d.token,orderId=d.order.id;
+const jpg=new Uint8Array([0xff,0xd8,0xff,0xe0,0,16,74,70,73,70,0,1,1,0,0,1,0,1,0,0,0xff,0xd9]);
+const files=new Map();env.BUCKET={async put(k,b,o){files.set(k,{body:b,o})},async get(k){const f=files.get(k);return f?{body:f.body}:null}};
+const lp=(await load('app/api/orders/laundry-photo/route.ts'));if(lp.status!=='evaluated')await lp.evaluate();
+const sko=(await load('app/api/storekeeper/orders/route.ts'));if(sko.status!=='evaluated')await sko.evaluate();
+const skp=(await load('app/api/storekeeper/laundry-photo/route.ts'));if(skp.status!=='evaluated')await skp.evaluate();
+const form=(fields)=>{const f=new FormData();for(const [k,v] of Object.entries(fields))f.set(k,v);return new Request(origin+'/api/orders/laundry-photo',{method:'POST',headers:{Origin:origin,'cf-connecting-ip':'ip-'+Math.random()},body:f});};
+r=await lp.namespace.POST(form({id:orderId,token:'0'.repeat(64),photo:new File([jpg],'a.jpg',{type:'image/jpeg'})}));assert.equal(r.status,404,'wrong token');
+r=await lp.namespace.POST(form({id:orderId,token:orderToken,photo:new File([new Uint8Array([1,2,3,4])],'a.txt')}));assert.equal(r.status,400,'not an image');
+r=await lp.namespace.POST(form({id:orderId,token:orderToken,photo:new File([jpg],'a.jpg',{type:'image/jpeg'}),itemId:String(shirt),note:'Paint on the front'}));let pd=await r.json();assert.equal(r.status,201,pd.error);
+const chk=pd.order.laundryChecks[0];assert.equal(chk.status,'pending');assert.equal(chk.by,'customer');assert.equal(chk.key,undefined,'storage key hidden from customer');
+r=await lp.namespace.GET(new Request(origin+'/api/orders/laundry-photo?id='+orderId+'&token='+orderToken+'&check='+chk.id));assert.equal(r.status,200);
+// The laundry signs in, sees the photo, and must give a reason to refuse
+currentUser=null;const lr=await skAuth.POST(req('/api/storekeeper/auth','POST',{username:'boleclean',code:L1.code}));assert.equal(lr.status,200);cookieHeader=lr.headers.get('set-cookie').split(';')[0];
+let so=await(await sko.namespace.GET(req('/api/storekeeper/orders'))).json();let mine=so.orders.find(x=>x.id===orderId);assert.equal(mine.laundry,true);assert.equal(mine.checks.length,1);
+r=await skp.namespace.GET(req(mine.checks[0].img.replace(origin,'')));assert.equal(r.status,200,'laundry can view the photo');
+const before=payload(orderId).goodsTotal;
+r=await sko.namespace.PATCH(req('/api/storekeeper/orders','PATCH',{id:orderId,action:'check',checkId:chk.id,decision:'reject',reply:''}));assert.equal(r.status,409,'reason required');
+r=await sko.namespace.PATCH(req('/api/storekeeper/orders','PATCH',{id:orderId,action:'check',checkId:chk.id,decision:'reject',reply:'Paint will not come out'}));assert.equal(r.status,200);
+let po=payload(orderId);assert.equal(po.laundryChecks[0].status,'rejected');assert.equal(po.items.find(i=>i.id===shirt).n,4);assert.equal(po.goodsTotal,before-6000,'one shirt off the bill');
+r=await sko.namespace.PATCH(req('/api/storekeeper/orders','PATCH',{id:orderId,action:'check',checkId:chk.id,decision:'accept'}));assert.equal(r.status,409,'answered once');
+assert.equal(sql.prepare('SELECT quantity FROM store_stock WHERE store_id=? AND product_id=?').get(L1.id,shirt).quantity,1,'refusing a piece does not switch the laundry off');
+// a second photo accepted keeps the bill
+r=await lp.namespace.POST(form({id:orderId,token:orderToken,photo:new File([jpg],'b.jpg',{type:'image/jpeg'}),itemId:String(suit)}));pd=await r.json();const chk2=pd.order.laundryChecks[1];
+r=await sko.namespace.PATCH(req('/api/storekeeper/orders','PATCH',{id:orderId,action:'check',checkId:chk2.id,decision:'accept'}));assert.equal(r.status,200);assert.equal(payload(orderId).goodsTotal,before-6000);
+cookieHeader='';currentUser=owner;
+// Photo checks only for laundry orders
+const gl=(await load('lib/laundry-checks.ts')).namespace;assert.throws(()=>gl.addCheck({items:[]},{by:'rider',key:'k',type:'image/jpeg'}),/only for laundry/);
 // Laundry with 0 = not accepting: not chosen
 put(L1.id,shirt,0,6000);
 r=await orders.POST(req('/api/orders','POST',{...base,items:[{id:shirt,n:1}]}));d=await r.json();assert.equal(payload(d.order.id).allocation.storeId,L2.id);
@@ -65,4 +94,4 @@ assert.ok((await load('lib/partners.ts')).namespace.TYPES.includes('Laundry / dr
 // Storefront and storekeeper wiring
 const sf=fs.readFileSync('lib/storefront-html.ts','utf8');assert.match(sf,/cartIsLaundry/);assert.match(sf,/gulitLaundry/);assert.match(sf,/Best price · all laundries/);
 assert.match(fs.readFileSync('lib/storekeeper-html.ts','utf8'),/Accepting orders\?/);
-console.log('PASS: laundry — partner approval assigns items, per-laundry prices, compare, choose laundry, two trips, no bags, no stock hold, separate orders');
+console.log('PASS: laundry — photo checks (customer photo, laundry refuses with reason → piece off the bill), partner approval assigns items, per-laundry prices, compare, choose laundry, two trips, no bags, no stock hold, separate orders');
