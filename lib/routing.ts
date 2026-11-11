@@ -3,6 +3,7 @@ import { totals, paymentState, packFee, goodsOf } from './orders';
 import { zones, pickZone, roadKm, type Point } from './delivery';
 import { opsSettings, isOpen } from './settings';
 import { storeScores } from './stats';
+import { isLaundry, LAUNDRY_TRIPS } from './laundry';
 
 // Order routing (phase 1 rules from the development plan):
 //  - one order, one supermarket: the nearest active supermarket that has every item in stock;
@@ -59,7 +60,7 @@ async function storesWithAll(items: any[]): Promise<StoreRow[] | null> {
     if (!byStore.has(r.store_id)) byStore.set(r.store_id, { store: { id: r.store_id, name: r.name, lat: r.lat, lng: r.lng, chapa_subaccount: r.chapa_subaccount, commission_bps: r.commission_bps, open_time: r.open_time, close_time: r.close_time, radius_km: r.radius_km }, stock: new Map() });
     byStore.get(r.store_id)!.stock.set(r.product_id, r.quantity);
   }
-  return [...byStore.values()].filter(s => items.every(i => (s.stock.get(i.id) || 0) >= i.n)).map(s => s.store);
+  return [...byStore.values()].filter(s => items.every(i => (s.stock.get(i.id) || 0) >= (isLaundry(i.id) ? 1 : i.n))).map(s => s.store);
 }
 
 function point(s: { lat: number | null; lng: number | null }): Point | null {
@@ -70,6 +71,7 @@ function point(s: { lat: number | null; lng: number | null }): Point | null {
 export async function reserveAt(storeId: string, items: any[]) {
   const db = database(), done: any[] = [], now = Date.now();
   for (const i of items) {
+    if (isLaundry(i.id)) continue; // services are not held from stock
     const r = await db.prepare('UPDATE store_stock SET quantity=quantity-?,revision=revision+1,updated_at=? WHERE store_id=? AND product_id=? AND quantity>=?').bind(i.n, now, storeId, i.id, i.n).run();
     if (!r.meta.changes) { await giveBack(storeId, done); return false; }
     done.push(i);
@@ -78,7 +80,7 @@ export async function reserveAt(storeId: string, items: any[]) {
 }
 export async function giveBack(storeId: string, items: any[]) {
   const db = database(), now = Date.now();
-  for (const i of items) await db.prepare('UPDATE store_stock SET quantity=quantity+?,revision=revision+1,updated_at=? WHERE store_id=? AND product_id=?').bind(i.n, now, storeId, i.id).run();
+  for (const i of items) if (!isLaundry(i.id)) await db.prepare('UPDATE store_stock SET quantity=quantity+?,revision=revision+1,updated_at=? WHERE store_id=? AND product_id=?').bind(i.n, now, storeId, i.id).run();
 }
 
 /** Applies a supermarket to the order: seller name, and the Chapa payout when the store has one. */
@@ -95,8 +97,9 @@ export async function priceDelivery(o: any, store: { lat: number | null; lng: nu
   if (!o.inAddis) return;
   const from = store ? point(store) : null, to = o.customerLocation || null;
   const z = pickZone(await zones(), from && to ? roadKm(from, to) : null);
-  o.deliveryZone = { zone: z.zone, km: z.km, estimated: z.estimated, label: z.label };
-  Object.assign(o, totals(goodsOf(o), z.fee, o.packaging || 0));
+  const trips = o.laundry ? LAUNDRY_TRIPS : 1;
+  o.deliveryZone = { zone: z.zone, km: z.km, estimated: z.estimated, label: z.label + (trips > 1 ? ' · pickup and return' : ''), trips };
+  Object.assign(o, totals(goodsOf(o), z.fee * trips, o.packaging || 0));
   o.status = paymentState(o);
 }
 
@@ -122,7 +125,7 @@ export async function bestStores(items: any[], to: Point | null, exclude: string
   for (const s of list) {
     const goods = goodsAt(prices.get(s.id), items);
     if (goods === null) continue;
-    const p = point(s), fee = pickZone(zs, p && to ? roadKm(p, to) : null).fee;
+    const p = point(s), fee = pickZone(zs, p && to ? roadKm(p, to) : null).fee * (items.length && items.every((i: any) => isLaundry(i.id)) ? LAUNDRY_TRIPS : 1);
     cost.set(s.id, goods + Math.round(fee * 1.15));
   }
   const ok = list.filter(s => cost.has(s.id)), rank = new Map(ok.map((s, i) => [s.id, i]));

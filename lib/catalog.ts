@@ -1,5 +1,6 @@
 import { env } from "cloudflare:workers";
 import defaults from "./catalog-defaults.json";
+import { isLaundry } from "./laundry";
 export const CATEGORIES=["Electronics", "Home & Living", "Fashion", "Beauty & Care", "Groceries", "Supermarket", "Restaurant", "Laundry service", "Car & garage", "MEP", "Cleaning & Laundry", "Baby & Kids", "Appliances", "Mobiles & Tablets", "Home & Garden", "Stationery & Office", "Pet Supplies", "Toys & Outdoor", "Gaming & Cameras"];
 export type Product={id:number;name:string;cat:string;price:number;stock:number;image:string;badge:string;revision:number;manufacturingDate?:string|null;expiryDate?:string|null};
 export function database(){if(!env.DB)throw new Error("Catalog database is unavailable");return env.DB;}
@@ -17,7 +18,8 @@ export async function catalog(includeArchived=false,includeStoreStock=true){
   const sellable=p.storeStock.filter((s:any)=>s.price!==null&&s.quantity>0&&s.checked);
   p.stock=p.storeStock.filter((s:any)=>s.price!==null).reduce((n:number,s:any)=>n+s.quantity,0);
   if(sellable.length){p.fromPrice=Math.min(...sellable.map((s:any)=>s.price));p.priceVaries=new Set(sellable.map((s:any)=>s.price)).size>1;}
-  if(p.draft&&p.storeStock.some((s:any)=>s.ownPrice!==null)){p.draft=false;p.badge='Supermarket price';p.price=p.fromPrice??Math.min(...p.storeStock.filter((s:any)=>s.ownPrice!==null).map((s:any)=>s.ownPrice));}
+  if(isLaundry(p.id)&&sellable.length)p.stock=999; // a service: capacity is not counted down
+  if(p.draft&&p.storeStock.some((s:any)=>s.ownPrice!==null)){p.draft=false;p.badge=isLaundry(p.id)?'Laundry price':'Supermarket price';p.price=p.fromPrice??Math.min(...p.storeStock.filter((s:any)=>s.ownPrice!==null).map((s:any)=>s.ownPrice));}
  }
  for(const p of all.values())if(p.storeStock){const m=new Set(p.storeStock.map((x:any)=>x.manufacturingDate)),e=new Set(p.storeStock.map((x:any)=>x.expiryDate));p.datesVary=m.size>1||e.size>1;p.manufacturingDate=m.size===1?[...m][0]:null;p.expiryDate=e.size===1?[...e][0]:null;}
  }

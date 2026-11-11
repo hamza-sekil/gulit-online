@@ -2,7 +2,7 @@ import { database } from './catalog';
 import { AGREEMENT_VERSION } from './partner-agreement-html';
 // Partner business applications (supermarkets, shops, bakeries, producers…) (public form at /partners → owner review at /admin/partners).
 export const CATEGORIES = ['Groceries & pantry', 'Fruit & vegetables', 'Meat, dairy & eggs', 'Bakery', 'Drinks', 'Household & cleaning', 'Beauty & personal care', 'Baby & kids', 'Ready meals'];
-export const TYPES = ['Supermarket', 'Mini-market / shop', 'Bakery', 'Butcher', 'Fruit & vegetable shop', 'Dairy / eggs', 'Cosmetics & personal care shop', 'Restaurant / café', 'Producer / manufacturer', 'Wholesaler / distributor', 'Other'];
+export const TYPES = ['Supermarket', 'Mini-market / shop', 'Bakery', 'Butcher', 'Fruit & vegetable shop', 'Dairy / eggs', 'Cosmetics & personal care shop', 'Restaurant / café', 'Laundry / dry cleaner', 'Producer / manufacturer', 'Wholesaler / distributor', 'Other'];
 export const SIZES = ['Under 500', '500–2,000', '2,000–5,000', 'Over 5,000'];
 export const PAYOUTS = ['Bank account', 'Telebirr', 'CBE Birr'];
 export const STATUSES = ['new', 'contacted', 'approved', 'rejected'];

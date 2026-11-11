@@ -2,6 +2,7 @@ import { json } from '../../../../lib/owner';
 import { database } from '../../../../lib/catalog';
 import { storePrices } from '../../../../lib/routing';
 import { isOpen } from '../../../../lib/settings';
+import { isLaundry } from '../../../../lib/laundry';
 export const dynamic='force-dynamic';
 // "Compare & save": the shopper's bag priced at every partner supermarket (goods only; delivery depends on the map pin).
 export async function POST(r:Request){
@@ -16,7 +17,7 @@ export async function POST(r:Request){
   const stock=(await db.prepare(`SELECT store_id,product_id,quantity FROM store_stock WHERE product_id IN (${ids.map(()=>'?').join(',')})`).bind(...ids).all()).results as any[];
   const qty=new Map(stock.map(s=>[s.store_id+':'+s.product_id,s.quantity]));
   const prices=await storePrices(stores.map(s=>s.id),ids);
-  const out=stores.map(s=>{let goods=0,missing=0;for(const i of items){const c=prices.get(s.id)?.get(i.id);if(typeof c!=='number'||(qty.get(s.id+':'+i.id)||0)<i.n){missing++;continue;}goods+=c*i.n;}return {id:s.id,name:s.name,goodsCents:goods,missing,complete:missing===0,open:isOpen(s)};}).filter(s=>s.missing<items.length);
+  const out=stores.map(s=>{let goods=0,missing=0;for(const i of items){const c=prices.get(s.id)?.get(i.id);if(typeof c!=='number'||(qty.get(s.id+':'+i.id)||0)<(isLaundry(i.id)?1:i.n)){missing++;continue;}goods+=c*i.n;}return {id:s.id,name:s.name,goodsCents:goods,missing,complete:missing===0,open:isOpen(s)};}).filter(s=>s.missing<items.length);
   out.sort((a,b)=>Number(b.complete)-Number(a.complete)||a.missing-b.missing||a.goodsCents-b.goodsCents);
   return json({stores:out});
  }catch{return json({error:'Could not compare prices'},400);}
