@@ -15,7 +15,8 @@ export function friendlyRedirect(request: Request): Response | null {
   if (/^\/(api|_next|assets|social|product-photos)\//i.test(url.pathname) || /\.[a-z0-9]{2,5}$/i.test(url.pathname) && !/\.html$/i.test(url.pathname)) return null;
   let p = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
   // Tracking short links (gulitonline.com/tg, /tt, /yt …) open the shop and record where the visitor came from.
-  if (p === "/mep" || p === "/services") { const q = new URLSearchParams(url.search); q.set("department", "mep"); url.pathname = "/"; url.search = "?" + q.toString(); return Response.redirect(url.toString(), 302); }
+  const DEPT: Record<string, string> = { "/mep": "mep", "/services": "mep", "/laundry": "laundry", "/garage": "garage" };
+  if (DEPT[p]) { const q = new URLSearchParams(url.search); q.set("department", DEPT[p]); url.pathname = "/"; url.search = "?" + q.toString(); return Response.redirect(url.toString(), 302); }
   if (SOURCE_LINKS[p]) { url.pathname = "/"; url.search = "?s=" + SOURCE_LINKS[p]; return Response.redirect(url.toString(), 302); }
   p = ALIASES[p] || p;
   if (p === url.pathname) return null;
