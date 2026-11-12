@@ -70,4 +70,12 @@ Plumbing · Electrical · Mechanical — for homes, offices and factories. Leaks
 
 👉 <a href="https://gulitonline.com/mep?s=telegram">gulitonline.com/mep</a>
 📞 +251 909 225 566 · +251 910 828 617` },
+{ id: 'import-2026-11-13', video: 'gulit-import.mp4', text: `✈️ <b>ጉሊት — አስመጣልኝ!</b>
+ቤትዎን ለመጨረስ ጊዜ የለዎትም? ሴራሚክ፣ መብራት፣ በር፣ ኪችን፣ የመታጠቢያ ቤት ዕቃዎች... ከቻይና፣ ከቱርክ፣ ከዱባይ ወይም ከየትኛውም አገር እናስመጣለን። ዋጋውን (ዕቃ፣ ጭነት፣ ጉምሩክ፣ ማድረሻ) ከመክፈልዎ በፊት በአንድ ጊዜ እንልካለን።
+
+✈️ <b>Import for me</b>
+Too busy to finish your house? Tiles, lighting, doors, kitchens, bathroom fittings — we source them from China, Turkey, Dubai or anywhere, handle shipping and customs, and deliver to your site. One full quote before you pay.
+
+👉 <a href="https://gulitonline.com/import?s=telegram">gulitonline.com/import</a>
+📞 +251 909 225 566 · +251 910 828 617` },
 ];
