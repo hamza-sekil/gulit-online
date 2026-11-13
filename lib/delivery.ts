@@ -1,15 +1,18 @@
 import { database } from './catalog';
 
-// Delivery fee by distance zone (supermarket → customer), from the development plan:
-// Zone 1 under 3 km = 300 birr, Zone 2 3–7 km = 550, Zone 3 7–12 km = 850, Zone 4 over 12 km = 1,200 (before VAT).
+// Delivery fee by distance zone (store → customer), owner's price list from Nov 2026:
+// up to 3 km 200 birr, 3–6 km 300, 6–9 km 400, 9–12 km 500, 12–15 km 600, then +100 birr for every further 3 km
+// (15–18 km 700, 18–21 km 800 …), all before VAT. The last zone can carry that step (stepKm, stepFee).
 // Fees and limits are editable by the owner (stored in the settings table as "delivery_zones").
 // Distance = straight-line distance × ROAD_FACTOR, a simple estimate of road distance in Addis.
-export type Zone = { upToKm: number | null; fee: number }; // fee in cents (santim)
+export type Zone = { upToKm: number | null; fee: number; stepKm?: number; stepFee?: number }; // fees in cents (santim)
 export const DEFAULT_ZONES: Zone[] = [
-  { upToKm: 3, fee: 30000 },
-  { upToKm: 7, fee: 55000 },
-  { upToKm: 12, fee: 85000 },
-  { upToKm: null, fee: 120000 },
+  { upToKm: 3, fee: 20000 },
+  { upToKm: 6, fee: 30000 },
+  { upToKm: 9, fee: 40000 },
+  { upToKm: 12, fee: 50000 },
+  { upToKm: 15, fee: 60000 },
+  { upToKm: null, fee: 70000, stepKm: 3, stepFee: 10000 },
 ];
 export const ROAD_FACTOR = 1.3;
 export const DEFAULT_ZONE_INDEX = 1; // used (as an estimate) when the distance is unknown
@@ -41,7 +44,14 @@ export function validateZones(input: unknown): Zone[] {
     const fee = Math.round(Number(z?.fee));
     if (!Number.isSafeInteger(fee) || fee < 0 || fee > 10000000) throw Error('Each delivery fee must be between 0 and 100,000 birr.');
     const final = i === input.length - 1;
-    if (final) return { upToKm: null, fee };
+    if (final) {
+      const hasStep = z?.stepKm !== undefined && z?.stepKm !== null && z?.stepKm !== '' && Number(z?.stepFee) > 0;
+      if (!hasStep) return { upToKm: null, fee };
+      const stepKm = Math.round(Number(z.stepKm) * 10) / 10, stepFee = Math.round(Number(z.stepFee));
+      if (!Number.isFinite(stepKm) || stepKm < 0.5 || stepKm > 100) throw Error('The extra-distance step must be between 0.5 and 100 km.');
+      if (!Number.isSafeInteger(stepFee) || stepFee > 10000000) throw Error('The extra fee per step must be between 0 and 100,000 birr.');
+      return { upToKm: null, fee, stepKm, stepFee };
+    }
     const up = Number(z?.upToKm);
     if (!Number.isFinite(up) || up <= last || up > 500) throw Error('Zone distances must go up in order (for example 3, 7, 12 km).');
     last = up;
@@ -64,7 +74,8 @@ export async function saveZones(input: unknown) {
 
 export function zoneLabel(list: Zone[], index: number) {
   const z = list[index], from = index === 0 ? 0 : list[index - 1].upToKm;
-  return `Zone ${index + 1}: ` + (z.upToKm === null ? `over ${from} km` : index === 0 ? `under ${z.upToKm} km` : `${from}–${z.upToKm} km`);
+  const step = z.upToKm === null && z.stepKm && z.stepFee ? ` (+${z.stepFee / 100} birr every ${z.stepKm} km)` : '';
+  return `Zone ${index + 1}: ` + (z.upToKm === null ? `over ${from} km${step}` : index === 0 ? `under ${z.upToKm} km` : `${from}–${z.upToKm} km`);
 }
 
 /** Picks the zone for a distance. Unknown distance → the default zone, marked as an estimate. */
@@ -72,5 +83,11 @@ export function pickZone(list: Zone[], km: number | null) {
   let index = DEFAULT_ZONE_INDEX;
   if (km !== null) { index = list.findIndex(z => z.upToKm === null || km < z.upToKm); if (index < 0) index = list.length - 1; }
   index = Math.min(index, list.length - 1);
-  return { zone: index + 1, fee: list[index].fee, km, estimated: km === null, label: zoneLabel(list, index) };
+  const z = list[index], from = index === 0 ? 0 : (list[index - 1].upToKm as number);
+  if (km !== null && z.upToKm === null && z.stepKm && z.stepFee) {
+    // beyond the last fixed zone: add the step fee for every further stepKm
+    const band = Math.max(0, Math.floor((km - from) / z.stepKm)), lo = from + band * z.stepKm;
+    return { zone: index + 1 + band, fee: z.fee + band * z.stepFee, km, estimated: false, label: `Zone ${index + 1 + band}: ${Math.round(lo * 10) / 10}–${Math.round((lo + z.stepKm) * 10) / 10} km` };
+  }
+  return { zone: index + 1, fee: z.fee, km, estimated: km === null, label: zoneLabel(list, index) };
 }

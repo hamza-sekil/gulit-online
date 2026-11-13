@@ -29,8 +29,8 @@ same(delivery.coordsFrom('https://www.google.com/maps/search/?api=1&query=9.0108
 same(delivery.coordsFrom('https://www.google.com/maps/@9.0301,38.7406,17z'),{lat:9.0301,lng:38.7406});
 same(delivery.coordsFrom('9.0108, 38.7613'),{lat:9.0108,lng:38.7613});
 assert.equal(delivery.coordsFrom('https://maps.app.goo.gl/abc123'),null);assert.equal(delivery.coordsFrom('51.5072, -0.1276'),null,'outside Ethiopia');
-const Z=delivery.DEFAULT_ZONES;assert.equal(delivery.pickZone(Z,1.2).fee,30000);assert.equal(delivery.pickZone(Z,3).fee,55000);assert.equal(delivery.pickZone(Z,11.9).fee,85000);assert.equal(delivery.pickZone(Z,40).fee,120000);
-same([delivery.pickZone(Z,null).fee,delivery.pickZone(Z,null).estimated],[55000,true]);
+const Z=delivery.DEFAULT_ZONES;assert.equal(delivery.pickZone(Z,1.2).fee,20000);assert.equal(delivery.pickZone(Z,3).fee,30000);assert.equal(delivery.pickZone(Z,8.9).fee,40000);assert.equal(delivery.pickZone(Z,11.9).fee,50000);assert.equal(delivery.pickZone(Z,14).fee,60000);assert.equal(delivery.pickZone(Z,16).fee,70000);assert.equal(delivery.pickZone(Z,19).fee,80000);assert.equal(delivery.pickZone(Z,40).fee,150000);assert.equal(delivery.pickZone(Z,19).label,'Zone 7: 18–21 km');assert.match(delivery.zoneLabel(Z,5),/over 15 km \(\+100 birr every 3 km\)/);assert.equal(JSON.stringify(delivery.validateZones([{upToKm:3,fee:1},{upToKm:null,fee:2,stepKm:3,stepFee:5}])[1]),JSON.stringify({upToKm:null,fee:2,stepKm:3,stepFee:5}));assert.throws(()=>delivery.validateZones([{upToKm:3,fee:1},{upToKm:null,fee:2,stepKm:0.1,stepFee:5}]),/step/);
+same([delivery.pickZone(Z,null).fee,delivery.pickZone(Z,null).estimated],[30000,true]);
 
 // Two supermarkets, with map locations, stock and (for A) a Chapa payout account.
 const [p1,p2]=(await(await shop.GET()).json()).products.filter(p=>!p.draft&&p.stock>0&&p.price>0);
@@ -50,7 +50,7 @@ async function place(items,mapLink){const r=await orders.POST(req('/api/orders',
 // 1. Near Bole, only p1: nearest store with everything = A; stock held; zone 1; payout linked → seller can pay online.
 let {order,key}=await place([{id:p1.id,n:2}],'https://www.google.com/maps/search/?api=1&query=8.9970%2C38.7890');
 let o=payload(key.id);assert.equal(o.allocation.storeId,A.id);assert.equal(o.allocation.reserved,true);assert.equal(stockAt(A.id,p1.id),3);assert.equal(stockAt(B.id,p1.id),5);
-assert.equal(o.deliveryZone.zone,1);assert.equal(o.delivery,30000);assert.equal(o.deliveryZone.estimated,false);assert.equal(order.sellerName,'Bole Supermarket');assert.equal(order.sellerPayment.online,true);
+assert.equal(o.deliveryZone.zone,1);assert.equal(o.delivery,20000);assert.equal(o.deliveryZone.estimated,false);assert.equal(order.sellerName,'Bole Supermarket');assert.equal(order.sellerPayment.online,true);
 assert.equal(order.allocation,undefined,'routing details stay private');assert.equal(order.customerLocation,undefined);
 const first=key;
 
@@ -60,11 +60,11 @@ o=payload(key.id);assert.equal(o.allocation.storeId,B.id);assert.equal(stockAt(B
 assert.ok(o.deliveryZone.km>4&&o.deliveryZone.zone>=2,'distance-based zone from B');const second=key;
 
 // 3. No map pin: Zone 2 estimate.
-({order,key}=await place([{id:p1.id,n:1}]));o=payload(key.id);assert.equal(o.allocation.storeId,A.id,'stores with a map location first');assert.equal(o.delivery,55000);assert.equal(o.deliveryZone.estimated,true);const third=key;
+({order,key}=await place([{id:p1.id,n:1}]));o=payload(key.id);assert.equal(o.allocation.storeId,A.id,'stores with a map location first');assert.equal(o.delivery,30000);assert.equal(o.deliveryZone.estimated,true);const third=key;
 
 // 4. Owner changes the zone before the Gulit bill is paid; owner edits the zone fees.
 currentUser=owner;
-assert.equal((await adminOrders.PATCH(req('/api/admin/orders','PATCH',{id:third.id,action:'zone',zone:3}))).status,200);o=payload(third.id);assert.equal(o.delivery,85000);assert.equal(o.deliveryZone.estimated,false);assert.equal(o.gulitTotal,o.service+o.serviceVat+85000+12750);
+assert.equal((await adminOrders.PATCH(req('/api/admin/orders','PATCH',{id:third.id,action:'zone',zone:3}))).status,200);o=payload(third.id);assert.equal(o.delivery,40000);assert.equal(o.deliveryZone.estimated,false);assert.equal(o.gulitTotal,o.service+o.serviceVat+40000+6000);
 assert.equal((await adminOrders.PATCH(req('/api/admin/orders','PATCH',{action:'zones',zones:[{upToKm:5,fee:1},{upToKm:3,fee:2},{upToKm:null,fee:3}]}))).status,400);
 assert.equal((await adminOrders.PATCH(req('/api/admin/orders','PATCH',{action:'zones',zones:[{upToKm:3,fee:35000},{upToKm:7,fee:60000},{upToKm:12,fee:90000},{upToKm:null,fee:130000}]}))).status,200);
 assert.equal((await(await shop.GET()).json()).deliveryZones[0].fee,35000);
