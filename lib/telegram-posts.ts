@@ -78,4 +78,14 @@ Too busy to finish your house? Tiles, lighting, doors, kitchens, bathroom fittin
 
 👉 <a href="https://gulitonline.com/import?s=telegram">gulitonline.com/import</a>
 📞 +251 909 225 566 · +251 910 828 617` },
+{ id: 'suggest-2026-11-14', photo: 'gulit-suggest.jpg', text: `🌴🥗 <b>ውድ የቀድሞ ደንበኞቻችን፣ እንኳን ደህና መጡ!</b>
+የሚወዷቸውን <b>የአረብና ጤናማ ምግቦች</b> አስመጥተን ጉሊት ላይ ልናከማች ነው — ቴምር፣ የወይራ ዘይት፣ ታሂኒ፣ ባስማቲ ሩዝ፣ ኦትስ፣ ኪኖዋ፣ ማር፣ ከስኳር ነፃ ምርቶች…
+👉 <b>ምን እንዲኖር ይፈልጋሉ?</b> ይጠቁሙን፤ ብዙ የተጠየቀውን ቅድሚያ ሰጥተን እናስመጣለን!
+✈️ በኢትዮጵያ የማይገኝ ማንኛውም ዕቃም እናመጣልዎታለን።
+
+🌴🥗 <b>Arabian &amp; healthy foods are coming to Gulit!</b>
+Dates, olive oil, tahini, basmati, oats, quinoa, honey, sugar-free products… Tell us what you want stocked — the most-requested items come first. Anything you can't find in Ethiopia, we'll import for you.
+
+💡 <a href="https://gulitonline.com/suggest?s=telegram">gulitonline.com/suggest</a> · ✈️ <a href="https://gulitonline.com/import?s=telegram">gulitonline.com/import</a>
+📞 +251 909 225 566` },
 ];

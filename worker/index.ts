@@ -16,6 +16,7 @@ export function friendlyRedirect(request: Request): Response | null {
   let p = url.pathname.toLowerCase().replace(/\/+$/, "") || "/";
   // Tracking short links (gulitonline.com/tg, /tt, /yt …) open the shop and record where the visitor came from.
   const DEPT: Record<string, string> = { "/mep": "mep", "/services": "mep", "/laundry": "laundry", "/garage": "garage", "/import": "import", "/wholesale": "wholesale" };
+  if (p === "/suggest") { const q = new URLSearchParams(url.search); q.set("department", "import"); q.set("suggest", "1"); url.pathname = "/"; url.search = "?" + q.toString(); return Response.redirect(url.toString(), 302); }
   if (DEPT[p]) { const q = new URLSearchParams(url.search); q.set("department", DEPT[p]); url.pathname = "/"; url.search = "?" + q.toString(); return Response.redirect(url.toString(), 302); }
   if (SOURCE_LINKS[p]) { url.pathname = "/"; url.search = "?s=" + SOURCE_LINKS[p]; return Response.redirect(url.toString(), 302); }
   p = ALIASES[p] || p;
