@@ -1,0 +1,26 @@
+# Gulit Online (ጉሊት)
+
+> Gulit Online is an online market and delivery service in Addis Ababa, Ethiopia. Customers order groceries and household items from Addis supermarkets, shops and kiosks on gulitonline.com (English or Amharic) and Gulit riders deliver them to the door. Operated by M O M Manufacturing PLC, Bole, Woreda 13/14, Addis Ababa.
+
+## Key facts
+- Area: Addis Ababa, Ethiopia
+- Delivery fee: 200 birr up to 3 km, 300 up to 6 km, 400 up to 9 km, 500 up to 12 km, 600 up to 15 km, then +100 birr every 3 km
+- Payment: Telebirr, CBE Birr, card (online) or CBE bank deposit
+- Out of stock: the customer chooses a replacement or does not pay for the item
+- Languages: English and Amharic
+- Phone: +251 909 225 566, +251 910 828 617
+
+## Pages
+- [About Gulit and FAQ](https://gulitonline.com/about): services, delivery fees, how to order, contact
+- [Shop](https://gulitonline.com/): supermarket and shop products
+- [Laundry](https://gulitonline.com/laundry): laundry pickup and return, price per clothing type
+- [Home repair (MEP)](https://gulitonline.com/mep): plumbing, electrical and mechanical work
+- [Import for me](https://gulitonline.com/import): products not available in Ethiopia, including Arabian and healthy foods
+- [Wholesale](https://gulitonline.com/wholesale): bulk orders for businesses outside Addis, loaded on the customer's own truck
+- [Sell on Gulit](https://gulitonline.com/partners): supermarkets, shops, kiosks, laundries and service providers
+- [Help and support](https://gulitonline.com/support)
+
+## Social
+- Telegram: https://t.me/gulitonline1
+- TikTok: https://www.tiktok.com/@gulitonline
+- YouTube: https://www.youtube.com/@GulitOnlineMarket
