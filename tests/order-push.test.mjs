@@ -6,6 +6,7 @@ import {DatabaseSync} from 'node:sqlite';
 import ts from 'typescript';
 // Customer order notifications: subscribe with the private order code, payload-free VAPID pushes on order events, expired cleanup.
 const sql=new DatabaseSync(':memory:');for(const f of fs.readdirSync('drizzle').filter(f=>f.endsWith('.sql')).sort())sql.exec(fs.readFileSync(path.join('drizzle',f),'utf8'));
+sql.exec("INSERT INTO settings (key,value,updated_at) VALUES ('ops','{\"shopOpen\":1}',0)"); // product list open for these order tests
 const DB={prepare(q){let a=[];return {bind(...v){a=v;return this},async first(){return sql.prepare(q).get(...a)||null},async all(){return {results:sql.prepare(q).all(...a)}},async run(){const r=sql.prepare(q).run(...a);return {meta:{changes:r.changes}}}}}};
 const kp=await crypto.subtle.generateKey({name:'ECDSA',namedCurve:'P-256'},true,['sign','verify']);const pub=new Uint8Array(await crypto.subtle.exportKey('raw',kp.publicKey));const b64=u=>Buffer.from(u).toString('base64url');
 const env={DB,BUCKET:{async put(){},async get(){return null}},OWNER_EMAIL:'owner@example.test',GULIT_HOSTING:'chatgpt-sites',PUSH_VAPID_PUBLIC_KEY:b64(pub),PUSH_VAPID_PRIVATE_JWK:JSON.stringify(await crypto.subtle.exportKey('jwk',kp.privateKey))};

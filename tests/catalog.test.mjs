@@ -5,6 +5,7 @@ import vm from 'node:vm';
 import {DatabaseSync} from 'node:sqlite';
 import ts from 'typescript';
 const sql=new DatabaseSync(':memory:');for(const f of fs.readdirSync('drizzle').filter(f=>f.endsWith('.sql')).sort())sql.exec(fs.readFileSync('drizzle/'+f,'utf8'));
+sql.exec("INSERT INTO settings (key,value,updated_at) VALUES ('ops','{\"shopOpen\":1}',0)"); // product list open for these order tests
 let cookieHeader='';
 const DB={prepare(query){let args=[];return {bind(...values){args=values;return this},async first(){return sql.prepare(query).get(...args)||null},async all(){return {results:sql.prepare(query).all(...args)}},async run(){const r=sql.prepare(query).run(...args);return {meta:{changes:r.changes}}}}}};
 const files=new Map();const BUCKET={async put(key,bytes,options){files.set(key,{body:bytes,httpMetadata:options.httpMetadata})},async get(key){return files.get(key)||null}};

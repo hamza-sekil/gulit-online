@@ -7,3 +7,8 @@ for(const p of c.filter(p=>p.id>=210000&&p.id<211000)){assert.ok(fs.existsSync('
 assert.equal(new Set(c.map(p=>p.id)).size,c.length,'unique ids');
 const cat=fs.readFileSync('lib/catalog.ts','utf8');assert.match(cat,/!p\.hidden\|\|\(p\.storeStock\|\|\[\]\)\.some/);assert.match(cat,/hidden:all\.get\(row\.id\)\?\.hidden/);
 console.log('PASS: Ethiopian catalogue — '+visible.length+' visible, Gulf/demo items hidden unless a supermarket prices them');
+// While the product list is under construction (default), product orders are refused; laundry stays open; owner can switch it in Live.
+const ord=fs.readFileSync('lib/orders.ts','utf8');assert.match(ord,/if\(!laundry&&ops\.shopOpen!==1\)throw Error\('Our product list is being updated/);
+assert.match(fs.readFileSync('lib/settings.ts','utf8'),/shopOpen: 0 \}/);assert.match(fs.readFileSync('lib/admin-live-html.ts','utf8'),/Under construction \(services and registration only\)/);
+const sf=fs.readFileSync('lib/storefront-html.ts','utf8');assert.match(sf,/Our product list is under construction/);assert.match(sf,/Become an e-bike rider/);
+console.log('PASS: under-construction switch — orders blocked except laundry, owner toggle in Live, customer notice with registration links');

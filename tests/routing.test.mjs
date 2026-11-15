@@ -8,6 +8,7 @@ import ts from 'typescript';
 // Order routing, stock holds, delivery zones, storekeeper picking, driver pickup, cancel/expiry and refunds.
 const sql=new DatabaseSync(':memory:');
 for(const file of fs.readdirSync('drizzle').filter(f=>f.endsWith('.sql')).sort())sql.exec(fs.readFileSync(path.join('drizzle',file),'utf8'));
+sql.exec("INSERT INTO settings (key,value,updated_at) VALUES ('ops','{\"shopOpen\":1}',0)"); // product list open for these order tests
 const DB={prepare(query){let args=[];return {bind(...values){args=values;return this},async first(){return sql.prepare(query).get(...args)||null},async all(){return {results:sql.prepare(query).all(...args)}},async run(){const r=sql.prepare(query).run(...args);return {meta:{changes:r.changes}}}}}};
 const env={DB,BUCKET:{async put(){},async get(){return null}},OWNER_EMAIL:'owner@example.test',GULIT_HOSTING:'chatgpt-sites',CHAPA_SECRET_KEY:'CHASECK_TEST-fixturefixturefixture'};
 let currentUser=null,cookieHeader='';
