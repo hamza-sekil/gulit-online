@@ -7,7 +7,7 @@ export function database(){if(!env.DB)throw new Error("Catalog database is unava
 export async function catalog(includeArchived=false,includeStoreStock=true){
  const all=new Map<number,any>(defaults.map(p=>[p.id,{...p,archived:0}]));
  const data=await database().prepare("SELECT * FROM products").all();
- for(const row of data.results as any[]){all.set(row.id,{photoKind:row.image==='/icon-512.png'||row.image===all.get(row.id)?.image?all.get(row.id)?.photoKind:undefined,brand:all.get(row.id)?.brand,group:all.get(row.id)?.group,id:row.id,name:row.name,cat:row.category,price:row.price_cents/100,stock:row.stock,manufacturingDate:row.manufacturing_date,expiryDate:row.expiry_date,image:row.image==='/icon-512.png'?(all.get(row.id)?.image||row.image):row.image,badge:"Gulit collection",revision:row.revision,archived:row.archived});}
+ for(const row of data.results as any[]){all.set(row.id,{photoKind:row.image==='/icon-512.png'||row.image===all.get(row.id)?.image?all.get(row.id)?.photoKind:undefined,brand:all.get(row.id)?.brand,group:all.get(row.id)?.group,id:row.id,name:row.name,cat:row.category,price:row.price_cents/100,stock:row.stock,manufacturingDate:row.manufacturing_date,expiryDate:row.expiry_date,image:row.image==='/icon-512.png'?(all.get(row.id)?.image||row.image):row.image,badge:"Gulit collection",revision:row.revision,archived:row.archived,hidden:all.get(row.id)?.hidden});}
  if(includeStoreStock){
  const stocks=await database().prepare('SELECT x.*,s.name AS store_name,s.active AS store_active FROM store_stock x JOIN stores s ON s.id=x.store_id').all();
  for(const row of stocks.results as any[]){const p=all.get(row.product_id);if(!p)continue;if(!p.storeStock){p.storeStock=[];p.stockManaged=true;p.stock=0;}if(!row.store_active)continue;p.stock+=row.quantity;p.storeStock.push({storeId:row.store_id,storeName:row.store_name,quantity:row.quantity,ownPrice:row.price_cents==null?null:row.price_cents/100,manufacturingDate:row.manufacturing_date,expiryDate:row.expiry_date,checked:row.updated_by!=='pending',updatedAt:row.updated_at});}
@@ -23,7 +23,8 @@ export async function catalog(includeArchived=false,includeStoreStock=true){
  }
  for(const p of all.values())if(p.storeStock){const m=new Set(p.storeStock.map((x:any)=>x.manufacturingDate)),e=new Set(p.storeStock.map((x:any)=>x.expiryDate));p.datesVary=m.size>1||e.size>1;p.manufacturingDate=m.size===1?[...m][0]:null;p.expiryDate=e.size===1?[...e][0]:null;}
  }
- return [...all.values()].filter(p=>includeArchived||!p.archived);
+ // Hidden defaults (items not sold in Ethiopian supermarkets) stay out of the shop unless a supermarket has priced them.
+ return [...all.values()].filter(p=>includeArchived||!p.archived).filter(p=>includeArchived||!p.hidden||(p.storeStock||[]).some((x:any)=>x.price!==null));
 }
 export function validateProduct(input:any){
  if(typeof input!=='object'||!input)throw new Error("Invalid product");
@@ -32,7 +33,7 @@ export function validateProduct(input:any){
  const price=Number(input.price),stock=Number(input.stock);if(!Number.isFinite(price)||price<0||price>100000000)throw new Error("Enter a valid price in birr");
  if(!Number.isSafeInteger(stock)||stock<0||stock>100000000)throw new Error("Stock must be a whole number of zero or more");
  let image=String(input.image||'').trim();if(image.length>2000)throw new Error('Photo URL is too long');if(!image)image='/icon-512.png';
- if(image!=='/icon-512.png'&&image!=='/photo-pending.svg'&&!/^\/product-photos\/[a-f0-9]{18}\.jpg$/.test(image)&&!/^\/api\/images\/[a-zA-Z0-9._-]+$/.test(image)){
+ if(image!=='/icon-512.png'&&image!=='/photo-pending.svg'&&!/^\/product-photos\/[a-f0-9]{18}\.jpg$/.test(image)&&!/^\/api\/images\/[a-zA-Z0-9._-]+$/.test(image)&&!/^\/(staples|laundry)\/[a-z0-9-]+\.png$/.test(image)){
   let url;try{url=new URL(image);}catch{throw new Error("Upload a photo or enter a valid HTTPS image URL");}
   if(url.protocol!=='https:'||url.username||url.password)throw new Error("Photo URL must use HTTPS");
  }
