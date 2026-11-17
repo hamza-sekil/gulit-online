@@ -2,7 +2,7 @@
   "id": "/",
   "name": "Gulit Online",
   "short_name": "Gulit",
-  "description": "Groceries from Addis Ababa supermarkets, delivered. Pay with Telebirr, CBE Birr or card.",
+  "description": "Gulit Online in one app: groceries from Addis Ababa supermarkets, orders, laundry, home repair, import, wholesale, and the rider, engineer and storekeeper apps.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -31,6 +31,52 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "My orders",
+      "short_name": "Orders",
+      "url": "/?orders=1",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Rider app",
+      "short_name": "Rider",
+      "url": "/driver",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "All Gulit apps",
+      "short_name": "All apps",
+      "url": "/apps",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "Help & support",
+      "short_name": "Help",
+      "url": "/support",
+      "icons": [
+        {
+          "src": "/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
     }
   ]
 }
