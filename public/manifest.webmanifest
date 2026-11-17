@@ -46,8 +46,8 @@
       ]
     },
     {
-      "name": "Rider app",
-      "short_name": "Rider",
+      "name": "Driver app",
+      "short_name": "Driver",
       "url": "/driver",
       "icons": [
         {

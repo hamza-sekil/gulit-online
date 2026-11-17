@@ -20,7 +20,7 @@ const groups: [string, string, Tile[]][] = [
     ['🏪', 'Register your shop', 'ሱቅዎን ያስመዝግቡ', '/partners'],
   ]],
   ['Staff', 'ሰራተኞች', [
-    ['📍', 'Rider app', 'የአሽከርካሪ መተግበሪያ', '/driver', 'Login needed'],
+    ['🚚', 'Driver app', 'የሾፌር መተግበሪያ', '/driver', 'Drivers & riders · login needed'],
     ['🔧', 'MEP engineer', 'የMEP መሀንዲስ', '/engineer', 'Login needed'],
     ['🗃', 'Storekeeper', 'የመጋዘን ሰራተኛ', '/storekeeper', 'Login needed'],
   ]],
@@ -31,7 +31,7 @@ const groups: [string, string, Tile[]][] = [
     ['▶', 'TikTok', 'ቲክቶክ', 'https://www.tiktok.com/@gulitonline'],
   ]],
 ];
-const starts: [string, string][] = [['/', 'Shop / ገበያ'], ['/driver', 'Rider app / አሽከርካሪ'], ['/engineer', 'MEP engineer / መሀንዲስ'], ['/storekeeper', 'Storekeeper / መጋዘን'], ['/partners', 'Shop partner / የሱቅ አጋር']];
+const starts: [string, string][] = [['/', 'Shop / ገበያ'], ['/driver', 'Driver app / ሾፌር'], ['/engineer', 'MEP engineer / መሀንዲስ'], ['/storekeeper', 'Storekeeper / መጋዘን'], ['/partners', 'Shop partner / የሱቅ አጋር']];
 
 const tile = ([icon, en, am, href, note]: Tile) => {
   const ext = href.startsWith('http');
