@@ -33,7 +33,7 @@ export function validateProduct(input:any){
  const price=Number(input.price),stock=Number(input.stock);if(!Number.isFinite(price)||price<0||price>100000000)throw new Error("Enter a valid price in birr");
  if(!Number.isSafeInteger(stock)||stock<0||stock>100000000)throw new Error("Stock must be a whole number of zero or more");
  let image=String(input.image||'').trim();if(image.length>2000)throw new Error('Photo URL is too long');if(!image)image='/icon-512.png';
- if(image!=='/icon-512.png'&&image!=='/photo-pending.svg'&&!/^\/product-photos\/[a-f0-9]{18}\.jpg$/.test(image)&&!/^\/api\/images\/[a-zA-Z0-9._-]+$/.test(image)&&!/^\/(staples|laundry)\/[a-z0-9-]+\.png$/.test(image)){
+ if(image!=='/icon-512.png'&&image!=='/photo-pending.svg'&&!/^\/product-photos\/[a-f0-9]{18}\.jpg$/.test(image)&&!/^\/api\/images\/[a-zA-Z0-9._-]+$/.test(image)&&!/^\/(staples|laundry)\/[a-z0-9-]+\.png$/.test(image)&&!/^\/soap\/[a-z0-9-]+\.jpg$/.test(image)){
   let url;try{url=new URL(image);}catch{throw new Error("Upload a photo or enter a valid HTTPS image URL");}
   if(url.protocol!=='https:'||url.username||url.password)throw new Error("Photo URL must use HTTPS");
  }
