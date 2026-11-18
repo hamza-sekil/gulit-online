@@ -1257,7 +1257,7 @@
   },
   {
     "id": 7,
-    "name": "Nitsuh bath soap · 125 g · 48 pieces",
+    "name": "Nitsuh bath soap · ንፁህ ሳሙና · 70–150 g",
     "cat": "Beauty & Care",
     "price": 3000,
     "stock": 25,
@@ -15538,7 +15538,7 @@
   },
   {
     "id": 220001,
-    "name": "Pulito laundry soap bar · ፑሊቶ የልብስ ሳሙና",
+    "name": "Pulito laundry soap bar · 100–250 g · ፑሊቶ የልብስ ሳሙና",
     "cat": "Cleaning & Laundry",
     "group": "Pulito factory soaps",
     "brand": "Pulito",
@@ -15564,7 +15564,7 @@
   },
   {
     "id": 220003,
-    "name": "Zote laundry soap · white",
+    "name": "Zote laundry soap · 100–250 g",
     "cat": "Cleaning & Laundry",
     "group": "Pulito factory soaps",
     "brand": "Zote",
@@ -15577,7 +15577,7 @@
   },
   {
     "id": 220004,
-    "name": "Zote laundry soap · orange",
+    "name": "Zote laundry soap · 100–250 g",
     "cat": "Cleaning & Laundry",
     "group": "Pulito factory soaps",
     "brand": "Zote",
@@ -15590,7 +15590,7 @@
   },
   {
     "id": 220005,
-    "name": "Malibu soap bar",
+    "name": "Malibu soap bar · 100–250 g",
     "cat": "Cleaning & Laundry",
     "group": "Pulito factory soaps",
     "brand": "Malibu",
@@ -15603,7 +15603,7 @@
   },
   {
     "id": 220007,
-    "name": "Zeyla soap bar",
+    "name": "Zeyla soap bar · 100–250 g",
     "cat": "Cleaning & Laundry",
     "group": "Pulito factory soaps",
     "brand": "Zeyla",
@@ -15616,7 +15616,7 @@
   },
   {
     "id": 220008,
-    "name": "Mydlo soap bar",
+    "name": "Mydlo soap bar · 100–250 g",
     "cat": "Cleaning & Laundry",
     "group": "Pulito factory soaps",
     "brand": "Mydlo",
@@ -15629,7 +15629,7 @@
   },
   {
     "id": 220009,
-    "name": "Walif soap bar",
+    "name": "Walif soap bar · 100–250 g",
     "cat": "Cleaning & Laundry",
     "group": "Pulito factory soaps",
     "brand": "Walif",
@@ -15642,7 +15642,7 @@
   },
   {
     "id": 220010,
-    "name": "Bon Savon soap bar",
+    "name": "Bon Savon soap bar · 100–250 g",
     "cat": "Cleaning & Laundry",
     "group": "Pulito factory soaps",
     "brand": "Bon Savon",
@@ -15655,7 +15655,7 @@
   },
   {
     "id": 220011,
-    "name": "Tval soap bar",
+    "name": "Tval soap bar · 100–250 g",
     "cat": "Cleaning & Laundry",
     "group": "Pulito factory soaps",
     "brand": "Tval",
