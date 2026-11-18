@@ -1,9 +1,9 @@
 import { database } from './catalog';
 
 // Owner-adjustable operating rules (settings table, key "ops").
-export type Ops = { confirmMinutes: number; offerMinutes: number; lateMinutes: number; riderWaitMinutes: number; storekeeperBonus: number; packItemsPerBag: number; packBagPrice: number; driverBonusTarget: number; driverBonusFixed: number; driverBonusPerExtra: number; shopOpen: number };
-export const DEFAULT_OPS: Ops = { confirmMinutes: 10, offerMinutes: 5, lateMinutes: 60, riderWaitMinutes: 5, storekeeperBonus: 0, packItemsPerBag: 10, packBagPrice: 15, driverBonusTarget: 200, driverBonusFixed: 200000, driverBonusPerExtra: 2000, shopOpen: 0 }; // driver bonus amounts in cents; shopOpen 0 = product list under construction
-const LIMITS: Record<keyof Ops, [number, number]> = { confirmMinutes: [2, 120], offerMinutes: [0, 60], lateMinutes: [15, 480], riderWaitMinutes: [1, 60], storekeeperBonus: [0, 1000000], packItemsPerBag: [1, 200], packBagPrice: [0, 10000], driverBonusTarget: [1, 5000], driverBonusFixed: [0, 100000000], driverBonusPerExtra: [0, 10000000], shopOpen: [0, 1] };
+export type Ops = { confirmMinutes: number; offerMinutes: number; lateMinutes: number; riderWaitMinutes: number; storekeeperBonus: number; packItemsPerBag: number; packBagPrice: number; driverBonusTarget: number; driverBonusFixed: number; driverBonusPerExtra: number; shopOpen: number; agentPostFee: number };
+export const DEFAULT_OPS: Ops = { confirmMinutes: 10, offerMinutes: 5, lateMinutes: 60, riderWaitMinutes: 5, storekeeperBonus: 0, packItemsPerBag: 10, packBagPrice: 15, driverBonusTarget: 200, driverBonusFixed: 200000, driverBonusPerExtra: 2000, shopOpen: 0, agentPostFee: 500 }; // driver bonus amounts in cents; shopOpen 0 = product list under construction
+const LIMITS: Record<keyof Ops, [number, number]> = { confirmMinutes: [2, 120], offerMinutes: [0, 60], lateMinutes: [15, 480], riderWaitMinutes: [1, 60], storekeeperBonus: [0, 1000000], packItemsPerBag: [1, 200], packBagPrice: [0, 10000], driverBonusTarget: [1, 5000], driverBonusFixed: [0, 100000000], driverBonusPerExtra: [0, 10000000], shopOpen: [0, 1], agentPostFee: [0, 1000000] };
 
 export function validateOps(input: any): Ops {
   const out: any = {};

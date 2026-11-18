@@ -120,6 +120,13 @@
       "when": 1794720000000,
       "tag": "0016_rider_location",
       "breakpoints": true
+    },
+    {
+      "idx": 17,
+      "version": "6",
+      "when": 1794806400000,
+      "tag": "0017_agents",
+      "breakpoints": true
     }
   ]
 }

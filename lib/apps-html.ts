@@ -91,6 +91,7 @@ main{max-width:760px;margin:-68px auto 0;padding:0 16px 48px;position:relative}
 .ric{width:42px;height:42px;border-radius:14px;background:#eef1ea;color:var(--g);display:grid;place-items:center;flex:none}
 .rt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}.rt b{font-size:15px;font-weight:700}.rt b .am{font-weight:500;color:var(--mut);font-size:13px}.rt small{font-size:12.5px;color:var(--mut)}
 .chev{color:#a5b0aa}
+.agents{display:flex;align-items:center;gap:14px;margin-top:12px;padding:15px 16px;border-radius:var(--r);background:var(--g);color:#fff;transition:transform .15s}.agents:active{transform:scale(.97)}.agents .ric{color:var(--g)}.agents small,.agents .am{color:#c9d8cf!important}
 .pill{display:inline-flex;align-items:center;font-size:11px;font-weight:700;color:var(--g)!important;background:#e3e8df;border-radius:999px;padding:3px 9px;margin-left:8px;vertical-align:2px}
 .card{margin-top:30px;background:var(--g);color:#fff;border-radius:var(--r);padding:20px;position:relative;overflow:hidden}
 .card h3{margin:0 0 6px;font-size:18px;font-weight:800;letter-spacing:-.02em}.card p{margin:0;opacity:.78;font-size:13.5px;line-height:1.55}
@@ -109,6 +110,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;margin-top:14px}
 <main>
 <div class="feat"><a class="fc shop" href="/?from=apps"><div><div class="k">Shop</div><h2>Your market, delivered</h2><div class="am">ገበያዎ እቤትዎ</div></div><span class="go">${svg('arrow', 18)}</span><span class="big">${svg('cart', 110)}</span></a>
 <a class="fc rider" href="/?rider=1"><div><div class="k">We're hiring</div><h2>Become a rider</h2><div class="am">አሽከርካሪ ይሁኑ</div></div><span class="go">${svg('arrow', 18)}</span><span class="big">${svg('bike', 110)}</span></a></div>
+<a class="agents" href="/agents"><span class="ric" style="background:var(--l)">${svg('store', 20)}</span><span class="rt"><b>Gulit Agents <span class="am">· ወኪሎች</span></b><small>Find agents across Ethiopia, or become one</small></span><span class="chev">${svg('chev', 18)}</span></a>
 <div class="sec"><h3>Services</h3><span class="am">አገልግሎቶች</span></div><div class="grid">${services.map(tile).join('')}</div>
 <div class="sec"><h3>Staff<span class="pill">Login needed</span></h3><span class="am">ሰራተኞች</span></div><div class="list">${staff.map(row).join('')}</div>
 <div class="sec"><h3>Help</h3><span class="am">እርዳታ</span></div><div class="list">${help.map(row).join('')}</div>
