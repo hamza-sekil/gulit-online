@@ -1,0 +1,1 @@
+UPDATE `agent_posts` SET `payload`=json_set(`payload`,'$.coverage','All of Ethiopia except Bale, Gamo Gofa and the Awash area of Afar (we already have agents there). The rest of Afar is open.') WHERE `id`='AG-PULITO';

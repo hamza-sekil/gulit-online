@@ -134,6 +134,13 @@
       "when": 1794892800000,
       "tag": "0018_pulito_brands",
       "breakpoints": true
+    },
+    {
+      "idx": 19,
+      "version": "6",
+      "when": 1794979200000,
+      "tag": "0019_agent_coverage",
+      "breakpoints": true
     }
   ]
 }
