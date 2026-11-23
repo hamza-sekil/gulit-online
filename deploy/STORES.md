@@ -30,7 +30,7 @@ The Android app is a thin wrapper that opens the shop full-screen in Chrome. It 
 3. Run `bubblewrap build`, which makes `app-release-bundle.aab`.
 4. In Play Console, create the app, turn on **Play App Signing**, and upload the .aab to Internal testing.
 5. In Play Console → App integrity, copy the **SHA-256 certificate fingerprint**. Set it on the website:
-   `npx wrangler secret put ANDROID_CERT_SHA256 --config dist/server/wrangler.json` (also set `ANDROID_PACKAGE` = `com.gulitonline.app`). `https://gulitonline.com/.well-known/assetlinks.json` must then show it. Without this, the app shows a browser bar.
+   Put them in `deploy/gulit.production.json` as `"androidPackage": "com.gulitonline.app"` and `"androidCertSha256": ["AA:BB:…"]` (the upload key and the Play app-signing key; fingerprints are public) and push. `https://gulitonline.com/.well-known/assetlinks.json` must then show it. Without this, the app shows a browser bar.
 6. Fill in the store listing, Data safety, content rating and target audience (below), then send to Production.
 
 ## Order notifications (all platforms)
