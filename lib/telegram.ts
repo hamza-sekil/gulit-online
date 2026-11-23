@@ -2,6 +2,7 @@ import { env } from 'cloudflare:workers';
 import { database } from './catalog';
 import { addisMinutes } from './settings';
 import { POSTS, MEDIA_BASE, type Post } from './telegram-posts';
+import { queueForInstagram } from './instagram';
 // Automatic Telegram channel posts from the Cloudflare cron (runs every minute; posts only when a slot is due).
 export type TG = { enabled: boolean; channel: string; everyHours: number; startHour: number; endHour: number; next: number; lastSlot: string; lastAt: number; lastError: string; sent: number; postNow?: string };
 export const DEFAULT_TG: TG = { enabled: false, channel: '', everyHours: 7, startHour: 12, endHour: 19, next: 0, lastSlot: '', lastAt: 0, lastError: '', sent: 0 };
@@ -67,6 +68,7 @@ export async function postIfDue(now = Date.now()) {
   if (!await save(claimed, raw)) return 'busy';
   let err = '';
   try { await sendTelegram(s.channel, POSTS[i]); } catch (e) { err = e instanceof Error ? e.message : 'failed'; }
+  if (!err) await queueForInstagram(POSTS[i]).catch(() => {});
   for (let k = 0; k < 3; k++) { const cur = await tgSettings(); if (await save({ ...cur.s, lastAt: err ? cur.s.lastAt : now, sent: cur.s.sent + (err ? 0 : 1), lastError: err }, cur.raw)) break; }
   return err ? 'error' : 'sent';
 }
@@ -76,5 +78,6 @@ export async function postNextNow() {
   if (!s.channel) throw Error('Enter the channel first.');
   const i = s.next % POSTS.length;
   await sendTelegram(s.channel, POSTS[i]);
+  await queueForInstagram(POSTS[i]).catch(() => {});
   for (let k = 0; k < 3; k++) { const cur = await tgSettings(); if (await save({ ...cur.s, next: i + 1, lastAt: Date.now(), sent: cur.s.sent + 1, lastError: '' }, cur.raw)) return; }
 }

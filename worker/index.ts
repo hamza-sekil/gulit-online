@@ -4,6 +4,7 @@ import type { ConnectorBinding } from "../lib/connector-contract.mjs";
 import { onChatGPTSites, stripPlatformHeaders, assetLinksResponse } from "../lib/hosting";
 import { sweep } from "../lib/ops";
 import { postIfDue } from "../lib/telegram";
+import { processInstagram } from "../lib/instagram";
 import { countable, recordVisit, SOURCE_LINKS } from "../lib/visits";
 
 // People type or share links in many forms ("Gulitonline.com/Partners", "/partner", "/partners.html"):
@@ -58,6 +59,7 @@ const worker = {
   scheduled(_event: ScheduledController, _env: Cloudflare.Env, ctx: ExecutionContext) {
     ctx.waitUntil(sweep());
     ctx.waitUntil(postIfDue().catch(() => {}));
+    ctx.waitUntil(processInstagram().catch(() => {}));
   },
 };
 
